@@ -412,10 +412,25 @@ function startSync(){
   }, () => dot.classList.add('off'));
 }
 
+// ── Получить текущее время в Екатеринбурге ──
+function getNowEkb(){
+  const formatter = new Intl.DateTimeFormat('en-US', {timeZone:'Asia/Yekaterinburg', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
+  const parts = formatter.formatToParts(new Date());
+  const year = parts.find(p => p.type==='year').value;
+  const month = parts.find(p => p.type==='month').value;
+  const day = parts.find(p => p.type==='day').value;
+  const hour = parts.find(p => p.type==='hour').value;
+  const minute = parts.find(p => p.type==='minute').value;
+  const second = parts.find(p => p.type==='second').value;
+  // Создаём дату как UTC, потом корректируем
+  const utcDate = new Date(`${year}-${month}-${day}T${hour}:${minute}:${second}Z`);
+  return new Date(utcDate.getTime() + 5*60*60*1000);
+}
+
 // ── NEXT CONTACT LABEL (с точным временем, Екатеринбург UTC+5) ──
 function nextLabel(c){
   if(!c.nextDate) return null;
-  const now  = new Date();
+  const now  = getNowEkb();
   const next = parseEkbDateTime(c.nextDate, c.nextTime);
   const diffMs = next - now;
   const time   = c.nextTime || '';
@@ -475,7 +490,7 @@ function cardHTML(c){
 
 // ── ЗАДАЧНИК RENDER ──
 function renderTasks(){
-  const now = new Date();
+  const now = getNowEkb();
 
   const withDate = cards.filter(c => c.nextDate).map(c => {
     const next   = parseEkbDateTime(c.nextDate, c.nextTime);
@@ -484,7 +499,7 @@ function renderTasks(){
   }).sort((a, b) => a._next - b._next);
 
   // Конец текущей недели (воскресенье 23:59:59 Екатеринбург)
-  const ekbNow     = new Date(new Date().toLocaleString('en-US', {timeZone:'Asia/Yekaterinburg'}));
+  const ekbNow     = getNowEkb();
   const dayOfWeek  = ekbNow.getDay();
   const daysToSun  = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
   const weekEnd    = parseEkbDateTime(
