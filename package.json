@@ -12,6 +12,7 @@
     "cases:img": "node scripts/process-case-img.mjs",
     "about:img": "sips -s format jpeg ../IMG_2317.HEIC --out /tmp/office_about.jpg >/dev/null 2>&1; node scripts/process-about-img.mjs",
     "blog:placeholders": "node scripts/gen-blog-placeholders.mjs",
+    "blog:img": "node scripts/process-blog-img.mjs",
     "astro": "astro"
   },
   "dependencies": {
