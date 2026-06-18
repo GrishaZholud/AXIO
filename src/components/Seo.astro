@@ -1,0 +1,75 @@
+---
+// Single source of truth for the document <head> SEO block:
+// title, description, canonical, Open Graph, Twitter Card, robots,
+// and the merged JSON-LD @graph. Used by BaseLayout on every page.
+import { site } from '../lib/site';
+import { organizationSchema, websiteSchema } from '../lib/schema';
+
+export interface Props {
+  title: string;
+  description: string;
+  /** Path beginning with "/" — resolved to an absolute canonical URL */
+  path: string;
+  image?: string;
+  /** og:type — "website" (default) or "article" */
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  keywords?: string;
+  /** Extra schema.org nodes to merge into the @graph */
+  schema?: object[];
+}
+
+const {
+  title,
+  description,
+  path,
+  image = site.defaultOgImage,
+  type = 'website',
+  noindex = false,
+  keywords,
+  schema = [],
+} = Astro.props;
+
+const canonical = new URL(path, site.url).href.replace(/\/$/, '') || site.url;
+const ogImage = new URL(image, site.url).href;
+
+// Always inject Organization + WebSite; pages add their own nodes.
+const graph = [organizationSchema(), websiteSchema(), ...schema];
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': graph,
+};
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+{keywords && <meta name="keywords" content={keywords} />}
+<link rel="canonical" href={canonical} />
+{
+  noindex ? (
+    <meta name="robots" content="noindex, nofollow" />
+  ) : (
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+  )
+}
+
+<!-- Open Graph -->
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonical} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:locale" content="ru_RU" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<script
+  type="application/ld+json"
+  set:html={JSON.stringify(jsonLd)}
+  is:inline
+/>

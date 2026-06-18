@@ -1,0 +1,82 @@
+---
+// Marketplaces-specific section: «Что мы оформляем» — per-item design price
+// list (разовые работы). Slotted into ServicePage on /marketplaces.
+const items = [
+  { t: 'Главное фото (превью)', d: 'Обработка + продающая композиция — первое, что видит покупатель в поиске', price: 'от 1 500 ₽' },
+  { t: 'Инфографика — 1 карточка', d: '5–7 слайдов: преимущества, характеристики, размеры, способ применения', price: 'от 3 500 ₽' },
+  { t: 'Размерная таблица', d: 'Дизайн и вёрстка размерной сетки — для одежды, обуви, аксессуаров', price: 'от 1 000 ₽' },
+  { t: 'Rich-контент (Ozon)', d: 'Полноценная страница внутри карточки: блоки, заголовки, картинки — как лендинг', price: 'от 8 000 ₽' },
+  { t: 'Баннер акции / сезона', d: 'Баннер для страницы магазина или карточки под распродажу или праздник', price: 'от 2 000 ₽' },
+  { t: 'Логотип / аватар магазина', d: 'До 3 вариантов — выбираете лучший', price: 'от 5 000 ₽' },
+  { t: 'Баннер магазина (шапка)', d: 'Брендированная шапка страницы магазина на WB или Ozon', price: 'от 3 000 ₽' },
+  { t: 'Брендированный шаблон', d: 'Единый визуальный стиль для всего магазина — используете для всех товаров', price: 'от 10 000 ₽' },
+];
+---
+
+<section class="section mp-list" aria-labelledby="mp-list-title">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Что мы оформляем</span>
+      <h2 class="h2" id="mp-list-title">Разовые работы по карточкам</h2>
+      <p class="lead">Можно заказать отдельно — без пакета. Цены за единицу.</p>
+    </div>
+    <ul class="mp-list__grid reveal">
+      {
+        items.map((it) => (
+          <li class="mp-item">
+            <div class="mp-item__head">
+              <h3 class="mp-item__t">{it.t}</h3>
+              <span class="mp-item__price">{it.price}</span>
+            </div>
+            <p class="mp-item__d">{it.d}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .mp-list__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+  }
+  .mp-item {
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .mp-item:hover {
+      border-color: var(--gold);
+      box-shadow: var(--shadow-md);
+    }
+  }
+  .mp-item__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .mp-item__t {
+    font-size: 1.05rem;
+    color: var(--fg);
+  }
+  .mp-item__price {
+    flex-shrink: 0;
+    font-weight: 800;
+    color: var(--gold-deep);
+    white-space: nowrap;
+  }
+  .mp-item__d {
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+    line-height: 1.5;
+  }
+</style>

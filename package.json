@@ -1,0 +1,23 @@
+{
+  "name": "axio-site",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "og": "node scripts/gen-og.mjs",
+    "cases:img": "node scripts/process-case-img.mjs",
+    "about:img": "sips -s format jpeg ../IMG_2317.HEIC --out /tmp/office_about.jpg >/dev/null 2>&1; node scripts/process-about-img.mjs",
+    "blog:placeholders": "node scripts/gen-blog-placeholders.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.2.1",
+    "@fontsource-variable/manrope": "^5.1.0",
+    "astro": "^5.1.1",
+    "sharp": "^0.33.5"
+  }
+}

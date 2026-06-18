@@ -1,0 +1,156 @@
+---
+// "Работаем с" — platforms/tools we work with, shown as a single-row infinite
+// marquee on a dark band. Uses official brand logo files from
+// /public/images/tech/ when present, otherwise a neutral category icon.
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import Icon from './Icon.astro';
+import { techLogos } from '../data/assets';
+
+export interface Tool {
+  name: string;
+  icon: string;
+  logo: string;
+}
+export interface Props {
+  tools?: Tool[];
+  label?: string;
+}
+const {
+  tools = [
+    { name: 'Tilda', icon: 'layout', logo: 'tilda.svg' },
+    { name: 'WordPress', icon: 'layout', logo: 'wordpress.svg' },
+    { name: 'React', icon: 'code', logo: 'react.svg' },
+    { name: 'Next.js', icon: 'code', logo: 'nextjs.svg' },
+    { name: 'amoCRM', icon: 'flow', logo: 'amocrm.svg' },
+    { name: 'Битрикс24', icon: 'flow', logo: 'bitrix24.svg' },
+    { name: 'Яндекс Метрика', icon: 'chart', logo: 'yandex-metrika.svg' },
+    { name: 'ЮКасса', icon: 'card', logo: 'yukassa.svg' },
+    { name: 'Яндекс Директ', icon: 'target', logo: 'yandex-direct.svg' },
+  ],
+  label = 'Работаем с',
+} = Astro.props;
+
+const publicDir = fileURLToPath(new URL('../../public/', import.meta.url));
+const items = tools.map((t) => {
+  const stem = t.logo.replace(/\.[^.]+$/, '');
+  for (const file of [t.logo, `${stem}.png`, `${stem}.webp`]) {
+    if (existsSync(`${publicDir}images/tech/${file}`)) {
+      return { ...t, src: `/images/tech/${file}` };
+    }
+  }
+  return { ...t, src: (techLogos[t.name] ?? null) as string | null };
+});
+// Duplicate the set so the marquee can loop seamlessly (translateX -50%)
+const loop = [...items, ...items];
+---
+
+<section class="techbar" data-theme="dark" aria-label="Технологии и платформы">
+  <p class="techbar__label">{label}</p>
+  <div class="techbar__marquee">
+    <ul class="techbar__track">
+      {
+        loop.map((t, i) => (
+          <li class="techbar__item" aria-hidden={i >= items.length ? 'true' : undefined}>
+            {t.src ? (
+              <img class="techbar__logo" src={t.src} alt={i < items.length ? t.name : ''} loading="lazy" height="34" />
+            ) : (
+              <span class="techbar__fallback">
+                <span class="techbar__icon"><Icon name={t.icon} size={18} /></span>
+                {t.name}
+              </span>
+            )}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .techbar {
+    background: var(--ink);
+    padding-block: clamp(2.25rem, 4vw, 3.25rem);
+    overflow: hidden;
+  }
+  .techbar__label {
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.75rem;
+  }
+
+  .techbar__marquee {
+    overflow: hidden;
+    /* fade both edges so tiles slide in/out softly */
+    -webkit-mask: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    mask: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  }
+  .techbar__track {
+    display: flex;
+    width: max-content;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    animation: tb-scroll 40s linear infinite;
+  }
+  .techbar__marquee:hover .techbar__track {
+    animation-play-state: paused;
+  }
+  @keyframes tb-scroll {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .techbar__item {
+    flex: 0 0 auto;
+    margin-right: 1.25rem;
+    display: grid;
+    place-items: center;
+    height: 104px;
+    min-width: 240px;
+    padding: 0 1.5rem;
+    background: #fff;
+    border-radius: 14px;
+  }
+  .techbar__logo {
+    height: 56px;
+    width: auto;
+    max-width: 210px;
+    object-fit: contain;
+    transition: transform 0.25s var(--ease);
+  }
+  .techbar__item:hover .techbar__logo {
+    transform: scale(1.06);
+  }
+  .techbar__fallback {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .techbar__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    color: var(--gold-deep);
+    background: var(--gold-soft);
+    border-radius: 8px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .techbar__track {
+      animation: none;
+    }
+    .techbar__marquee {
+      overflow-x: auto;
+    }
+  }
+</style>

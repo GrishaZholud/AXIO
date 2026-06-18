@@ -1,0 +1,70 @@
+---
+// "Почему AXIO" — trust / guarantees block. Static, shared across pages.
+const items = [
+  { t: 'Договор и фиксированные сроки', d: 'Все условия, объём работ и сроки закреплены в договоре. При нашей задержке — компенсация.' },
+  { t: 'Прозрачные отчёты', d: 'Вы видите каждую цифру: позиции, трафик, заявки. Никаких «работаем, доверьтесь».' },
+  { t: 'Все доступы у вас', d: 'Хостинг, домен, код, рекламные кабинеты и аналитика остаются в ваших руках.' },
+  { t: 'Поддержка после запуска', d: 'Не бросаем проект на старте — помогаем с развитием, доработками и обновлениями.' },
+];
+---
+
+<section class="guarantees section" aria-labelledby="guarantees-title">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Почему AXIO</span>
+      <h2 class="h2" id="guarantees-title">Работаем честно и прозрачно</h2>
+    </div>
+    <ul class="guarantees__grid reveal">
+      {
+        items.map((it) => (
+          <li class="guarantee">
+            <span class="guarantee__icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6z" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+            </span>
+            <h3 class="guarantee__t">{it.t}</h3>
+            <p class="guarantee__d">{it.d}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .guarantees__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    list-style: none;
+    padding: 0;
+  }
+  .guarantee {
+    padding: 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .guarantee__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    color: var(--gold-deep);
+    background: var(--gold-soft);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+  .guarantee__t {
+    font-size: 1.1rem;
+    color: var(--fg);
+    margin-bottom: 0.5rem;
+  }
+  .guarantee__d {
+    font-size: 0.92rem;
+    color: var(--fg-muted);
+    line-height: 1.55;
+  }
+</style>

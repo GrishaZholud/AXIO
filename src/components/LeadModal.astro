@@ -1,0 +1,274 @@
+---
+// Global lead-capture modal. Rendered once in BaseLayout. Any element with
+// the `data-lead-open` attribute opens it. Uses the native <dialog> element
+// for focus trapping, Esc-to-close and backdrop, with a graceful success state.
+import DirectionSelect from './DirectionSelect.astro';
+---
+
+<dialog class="lead-modal" data-lead-modal aria-labelledby="lead-modal-title">
+  <div class="lead-modal__inner">
+    <button type="button" class="lead-modal__close" data-lead-close aria-label="Закрыть">
+      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <div class="lead-modal__head">
+      <span class="eyebrow">Бесплатная консультация</span>
+      <h2 class="h3" id="lead-modal-title">Обсудим ваш проект</h2>
+      <p>Заполните форму — свяжемся в течение часа и предложим стратегию под ваши задачи.</p>
+    </div>
+
+    <form class="lead-modal__form" data-lead-form novalidate>
+      <div class="field">
+        <label for="m-name">Как вас зовут</label>
+        <input id="m-name" name="name" type="text" autocomplete="name" required />
+      </div>
+      <div class="field">
+        <label for="m-contact">Телефон или E-mail</label>
+        <input id="m-contact" name="contact" type="text" autocomplete="tel" required />
+      </div>
+      <div class="field">
+        <label for="m-direction">Какое направление вас интересует</label>
+        <DirectionSelect id="m-direction" />
+      </div>
+      <button type="submit" class="btn btn--gold btn--lg">Отправить заявку</button>
+      <p class="lead-modal__consent">
+        Нажимая кнопку, вы соглашаетесь с
+        <a href="/privacy">политикой конфиденциальности</a>.
+      </p>
+    </form>
+
+    <div class="lead-modal__success" data-lead-success hidden>
+      <div class="lead-modal__check" aria-hidden="true">
+        <svg width="34" height="34" viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </div>
+      <strong>Заявка отправлена!</strong>
+      <span>Спасибо! Мы свяжемся с вами в течение часа.</span>
+      <button type="button" class="btn btn--ghost" data-lead-close>Закрыть</button>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .lead-modal {
+    /* Bulletproof centering across browsers (global `* { margin: 0 }` strips
+       the UA default, and some engines mis-place top-layer dialogs). */
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: min(520px, calc(100vw - 2rem));
+    max-height: calc(100dvh - 2rem);
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--cream);
+    color: var(--text);
+    box-shadow: 0 30px 80px rgba(26, 26, 23, 0.35);
+    overflow: visible;
+  }
+  .lead-modal::backdrop {
+    background: rgba(26, 26, 23, 0.55);
+    backdrop-filter: blur(3px);
+  }
+  /* Enter animation via @starting-style (graceful, no scale-from-zero) */
+  .lead-modal[open] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition: opacity 0.22s var(--ease-out), transform 0.22s var(--ease-out);
+  }
+  @starting-style {
+    .lead-modal[open] {
+      opacity: 0;
+      transform: translateY(8px) scale(0.97);
+    }
+  }
+  .lead-modal[open]::backdrop {
+    animation: modal-backdrop 0.25s ease forwards;
+  }
+  @keyframes modal-backdrop {
+    from { opacity: 0; }
+  }
+
+  .lead-modal__inner {
+    position: relative;
+    padding: clamp(1.75rem, 4vw, 2.5rem);
+  }
+  .lead-modal__close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.18s var(--ease), color 0.18s var(--ease);
+  }
+  .lead-modal__close:hover {
+    background: var(--cream-3);
+    color: var(--ink);
+  }
+
+  .lead-modal__head {
+    margin-bottom: 1.5rem;
+  }
+  .lead-modal__head .h3 {
+    color: var(--ink);
+    margin-block: 0.6rem 0.5rem;
+  }
+  .lead-modal__head p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .lead-modal__form {
+    display: grid;
+    gap: 1.1rem;
+  }
+  .field {
+    display: grid;
+    gap: 0.45rem;
+  }
+  .field label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .field input,
+  .field select {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    color: var(--ink);
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  }
+  /* Modern select: strip the native chrome, draw our own chevron */
+  .field select {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 2.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%23a68a5b' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1.1rem center;
+    cursor: pointer;
+  }
+  .field select:invalid {
+    color: var(--text-faint);
+  }
+  .field input:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-soft);
+  }
+  .field input:user-invalid {
+    border-color: var(--danger);
+  }
+  .lead-modal__form .btn {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
+  .lead-modal__consent {
+    font-size: 0.78rem;
+    color: var(--text-faint);
+    text-align: center;
+  }
+  .lead-modal__consent a {
+    color: var(--gold-deep);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* The success block only displays when explicitly toggled */
+  .lead-modal__success {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 0.75rem;
+    padding: 1rem 0;
+  }
+  .lead-modal__success[hidden] {
+    display: none;
+  }
+  .lead-modal__check {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--gold-soft);
+    color: var(--gold-deep);
+  }
+  .lead-modal__success strong {
+    font-size: 1.3rem;
+    color: var(--ink);
+  }
+  .lead-modal__success span {
+    color: var(--text-muted);
+  }
+  .lead-modal__success .btn {
+    margin-top: 0.5rem;
+  }
+</style>
+
+<script>
+  const modal = document.querySelector<HTMLDialogElement>('[data-lead-modal]');
+  if (modal) {
+    const form = modal.querySelector<HTMLFormElement>('[data-lead-form]');
+    const success = modal.querySelector<HTMLElement>('[data-lead-success]');
+    const endpoint = 'https://formspree.io/f/mvzybdlz';
+
+    const openModal = () => {
+      // reset to the form view each time
+      if (form && success) {
+        form.hidden = false;
+        success.hidden = true;
+      }
+      modal.showModal();
+    };
+    const closeModal = () => modal.close();
+
+    document.querySelectorAll<HTMLElement>('[data-lead-open]').forEach((btn) => {
+      btn.addEventListener('click', () => openModal());
+    });
+    modal.querySelectorAll('[data-lead-close]').forEach((btn) =>
+      btn.addEventListener('click', closeModal)
+    );
+    // Click on backdrop closes
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      try {
+        if (endpoint) {
+          await fetch(endpoint, {
+            method: 'POST',
+            headers: { Accept: 'application/json' },
+            body: new FormData(form),
+          });
+        }
+      } catch {
+        /* never block the user on a network error */
+      }
+      if (success) {
+        form.hidden = true;
+        success.hidden = false;
+      }
+      form.reset();
+    });
+  }
+</script>

@@ -1,0 +1,198 @@
+---
+// Tabbed FAQ: pick a direction, see its questions. Accessible tablist +
+// accordion. Pair with faqSchema() over the same items in the page <Seo>
+// (pass every tab's items so answer engines see the full set).
+import type { FaqItem } from '../lib/schema';
+
+export interface FaqTab {
+  label: string;
+  items: FaqItem[];
+}
+export interface Props {
+  tabs: FaqTab[];
+  title?: string;
+  eyebrow?: string;
+}
+const { tabs, title = 'Часто задаваемые вопросы', eyebrow = 'FAQ' } = Astro.props;
+---
+
+<section class="section faqt" aria-labelledby="faqt-title">
+  <div class="container container--narrow">
+    <div class="section-head section-head--center reveal">
+      <span class="eyebrow">{eyebrow}</span>
+      <h2 class="h2" id="faqt-title">{title}</h2>
+    </div>
+
+    <div class="faqt__tabs" role="tablist" aria-label="Направления" data-faq-tabs>
+      {
+        tabs.map((tab, i) => (
+          <button
+            type="button"
+            role="tab"
+            id={`faqt-tab-${i}`}
+            aria-controls={`faqt-panel-${i}`}
+            aria-selected={i === 0 ? 'true' : 'false'}
+            tabindex={i === 0 ? '0' : '-1'}
+            class="faqt__tab"
+          >
+            {tab.label}
+          </button>
+        ))
+      }
+    </div>
+
+    {
+      tabs.map((tab, i) => (
+        <ul
+          class="faqt__list"
+          id={`faqt-panel-${i}`}
+          role="tabpanel"
+          aria-labelledby={`faqt-tab-${i}`}
+          hidden={i !== 0}
+        >
+          {tab.items.map((item) => (
+            <li class="faqt__item">
+              <details name={`faq-${i}`}>
+                <summary>
+                  <span class="faqt__q">{item.q}</span>
+                  <span class="faqt__icon" aria-hidden="true" />
+                </summary>
+                <div class="faqt__a">
+                  <p>{item.a}</p>
+                </div>
+              </details>
+            </li>
+          ))}
+        </ul>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .faqt__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .faqt__tab {
+    padding: 0.6rem 1.1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.18s var(--ease), border-color 0.18s var(--ease),
+      background 0.18s var(--ease);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .faqt__tab:hover {
+      border-color: var(--gold-line);
+      color: var(--ink);
+    }
+  }
+  .faqt__tab[aria-selected='true'] {
+    color: var(--ink);
+    background: var(--gold-soft);
+    border-color: var(--gold);
+  }
+
+  .faqt__list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  /* `display: grid` above would otherwise override the [hidden] attribute,
+     leaving every panel visible (all questions in one list). */
+  .faqt__list[hidden] {
+    display: none;
+  }
+  .faqt__item {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  }
+  .faqt__item:has(details[open]) {
+    border-color: var(--gold-line);
+    box-shadow: var(--shadow-sm);
+  }
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--ink);
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .faqt__icon {
+    position: relative;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+  }
+  .faqt__icon::before,
+  .faqt__icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 2px;
+    background: var(--gold-deep);
+    border-radius: 2px;
+    transform: translate(-50%, -50%);
+    transition: transform 0.25s var(--ease);
+  }
+  .faqt__icon::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+  details[open] .faqt__icon::after {
+    transform: translate(-50%, -50%) rotate(0);
+  }
+  .faqt__a {
+    padding: 0 1.5rem 1.4rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    max-width: 64ch;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-faq-tabs]').forEach((tablist) => {
+    const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const select = (idx: number, focus = true) => {
+      tabs.forEach((tab, i) => {
+        const selected = i === idx;
+        tab.setAttribute('aria-selected', String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        const panel = document.getElementById(tab.getAttribute('aria-controls')!);
+        if (panel) panel.hidden = !selected;
+      });
+      if (focus) tabs[idx].focus();
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(i, false));
+      tab.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          const dir = e.key === 'ArrowRight' ? 1 : -1;
+          select((i + dir + tabs.length) % tabs.length);
+        }
+      });
+    });
+  });
+</script>

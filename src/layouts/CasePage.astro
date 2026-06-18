@@ -1,0 +1,435 @@
+---
+// Shared template for every case study. A thin page passes the slug; this
+// pulls metadata from cases.ts and body from caseContent.ts, and renders the
+// hero, situation, what-we-did, results, related cases, FAQ and CTA — plus
+// Article / FAQ / Breadcrumb schema.
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import CtaForm from '../components/CtaForm.astro';
+import CaseCard from '../components/CaseCard.astro';
+import Icon from '../components/Icon.astro';
+import { getCase, cases, casesAreDemo } from '../data/cases';
+import { getService } from '../data/services';
+import { caseContent } from '../data/caseContent';
+import { faqsByTopic } from '../data/faqs';
+import { site } from '../lib/site';
+import { articleSchema, faqSchema, breadcrumbSchema, type Crumb } from '../lib/schema';
+
+export interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+const study = getCase(slug)!;
+const c = caseContent[slug];
+const faqs = faqsByTopic[c.faqTopic];
+const related = cases
+  .filter((x) => x.slug !== slug && x.tags.some((t) => study.tags.includes(t)))
+  .slice(0, 3);
+
+// Internal links case → service pages (SEO). Derive from tags, with a couple
+// of explicit overrides where a tag maps to a specific service.
+const tagToService: Record<string, string[]> = {
+  SEO: ['seo'],
+  Маркетплейсы: ['marketplaces'],
+  Карты: ['maps'],
+  Таргет: ['target'],
+  'Внедрение ИИ': ['ai'],
+  Сайты: ['code'],
+};
+const serviceOverride: Record<string, string[]> = {
+  pravo: ['tilda', 'seo'],
+};
+const projectServices = (
+  serviceOverride[slug] ?? [
+    ...new Set(study.tags.flatMap((t) => tagToService[t] ?? [])),
+  ]
+)
+  .map((s) => getService(s))
+  .filter((s): s is NonNullable<typeof s> => Boolean(s));
+
+const crumbs: Crumb[] = [
+  { name: 'Главная', href: '/' },
+  { name: 'Кейсы', href: '/cases' },
+  { name: study.client, href: `/cases/${slug}` },
+];
+
+const schema = [
+  articleSchema({
+    headline: study.headline,
+    description: study.seoDescription,
+    url: `${site.url}/cases/${slug}`,
+    image: `/images/og/${slug}.jpg`,
+    datePublished: c.datePublished,
+    dateModified: c.dateModified,
+  }),
+  faqSchema(faqs),
+  breadcrumbSchema(crumbs),
+];
+---
+
+<BaseLayout
+  title={study.seoTitle}
+  description={study.seoDescription}
+  path={`/cases/${slug}`}
+  type="article"
+  heroHeader={true}
+  schema={schema}
+>
+  <!-- Hero -->
+  <section class="case-hero" data-theme="dark">
+    <div class="case-hero__glow" aria-hidden="true"></div>
+    <div class="container case-hero__inner">
+      <div class="case-hero__crumbs"><Breadcrumbs crumbs={crumbs} dark /></div>
+      <span class="eyebrow">{c.eyebrow}</span>
+      <h1 class="h1 case-hero__title">{c.title ?? `${study.industry} ${study.client}`}</h1>
+      <p class="lead case-hero__lead">{c.lead}</p>
+      {casesAreDemo && (
+        <p class="case-hero__demo">
+          Демонстрационный кейс — пример того, как мы оформляем результаты работы.
+        </p>
+      )}
+      <dl class="case-hero__metrics">
+        {study.metrics.map((m) => (
+          <div>
+            <dt>{m.value}</dt>
+            <dd>{m.label}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <article class="case-body">
+    {c.cover && (
+      <div class="container container--narrow">
+        <img class="case-cover" src={c.cover} alt={study.headline} width="1200" height="675" loading="lazy" />
+      </div>
+    )}
+
+    <!-- Situation -->
+    <section class="section">
+      <div class="container container--narrow">
+        <div class="case-block reveal">
+          <span class="eyebrow">С чего начали</span>
+          <h2 class="h2">{c.situationTitle}</h2>
+          {c.situation.map((p) => <p>{p}</p>)}
+        </div>
+      </div>
+    </section>
+
+    <!-- What we did -->
+    <section class="section did" data-theme="dark" aria-labelledby="did-title">
+      <div class="container container--narrow">
+        <div class="section-head reveal">
+          <span class="eyebrow">Что мы сделали</span>
+          <h2 class="h2" id="did-title">Решение</h2>
+        </div>
+        <ol class="did__list reveal">
+          {c.did.map((step, i) => (
+            <li class="did__step">
+              <span class="did__n">{String(i + 1).padStart(2, '0')}</span>
+              <div>
+                <h3 class="did__t">{step.t}</h3>
+                <p class="did__d">{step.d}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="section">
+      <div class="container container--narrow">
+        <div class="case-block reveal">
+          <span class="eyebrow">Результат</span>
+          <h2 class="h2">{c.resultsTitle}</h2>
+          <p class="case-block__note">{c.resultsNote}</p>
+          <ul class="results">
+            {c.results.map((r) => <li>{r}</li>)}
+          </ul>
+        </div>
+      </div>
+    </section>
+  </article>
+
+  {
+    projectServices.length > 0 && (
+      <section class="section case-svc" aria-labelledby="case-svc-title">
+        <div class="container container--narrow">
+          <div class="section-head reveal">
+            <span class="eyebrow">Услуги в проекте</span>
+            <h2 class="h2" id="case-svc-title">Что мы применили</h2>
+          </div>
+          <div class="case-svc__grid reveal">
+            {projectServices.map((s) => (
+              <a href={`/${s.slug}`} class="case-svc__card">
+                <span class="case-svc__icon"><Icon name={s.icon} size={22} /></span>
+                <span class="case-svc__body">
+                  <span class="case-svc__name">{s.label}</span>
+                  <span class="case-svc__desc">{s.short}</span>
+                </span>
+                <svg class="case-svc__arrow" width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                  <path d="M4 9h9M9 5l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    related.length > 0 && (
+      <section class="section cases-rel" data-theme="dark" aria-labelledby="rel-title">
+        <div class="container">
+          <div class="section-head reveal">
+            <span class="eyebrow">Ещё кейсы</span>
+            <h2 class="h2" id="rel-title">Похожие проекты</h2>
+          </div>
+          <div class="cases-rel__grid reveal">
+            {related.map((x) => <CaseCard study={x} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <Faq items={faqs} title="Частые вопросы" eyebrow="FAQ" />
+  <CtaForm title="Хотите такой же результат?" text="Расскажите про задачу — предложим решение и оценим сроки. Бесплатно, в течение часа." />
+</BaseLayout>
+
+<style>
+  .case-hero {
+    position: relative;
+    overflow: hidden;
+    background: var(--ink);
+    padding-top: clamp(7rem, 14vh, 9.5rem);
+    padding-bottom: clamp(3rem, 7vw, 5rem);
+  }
+  .case-hero__glow {
+    position: absolute;
+    top: -20%;
+    right: -8%;
+    width: 48vw;
+    height: 48vw;
+    max-width: 600px;
+    max-height: 600px;
+    background: radial-gradient(circle, rgba(196, 166, 117, 0.2), transparent 62%);
+    pointer-events: none;
+  }
+  .case-hero__inner {
+    position: relative;
+    max-width: 800px;
+  }
+  .case-hero__crumbs {
+    margin-bottom: 1.75rem;
+  }
+  .case-hero .eyebrow {
+    color: var(--gold);
+  }
+  .case-hero__title {
+    color: var(--on-dark);
+    margin-block: 1.25rem;
+  }
+  .case-hero__lead {
+    color: var(--on-dark-muted);
+    max-width: 58ch;
+  }
+  .case-hero__demo {
+    margin-top: 1.5rem;
+    display: inline-block;
+    font-size: 0.8rem;
+    color: var(--on-dark-muted);
+    padding: 0.5rem 0.9rem;
+    border: 1px dashed var(--gold-line);
+    border-radius: 999px;
+  }
+  .case-hero__metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(2rem, 6vw, 4rem);
+    margin-top: 3rem;
+    padding-top: 2.25rem;
+    border-top: 1px solid var(--gold-line);
+  }
+  .case-hero__metrics dt {
+    font-size: clamp(2rem, 1.6rem + 1.6vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--gold);
+  }
+  .case-hero__metrics dd {
+    margin: 0.25rem 0 0;
+    font-size: 0.88rem;
+    color: var(--on-dark-muted);
+    max-width: 16ch;
+  }
+
+  .case-cover {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-top: clamp(2.5rem, 5vw, 4rem);
+    margin-bottom: clamp(-0.5rem, 0vw, 0rem);
+  }
+
+  .case-block .eyebrow {
+    margin-bottom: 0.85rem;
+  }
+  .case-block h2 {
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+  }
+  .case-block p {
+    color: var(--text-muted);
+    margin-bottom: 1.1rem;
+    font-size: 1.05rem;
+    line-height: 1.65;
+  }
+  .case-block__note {
+    font-size: 0.9rem !important;
+    color: var(--text-faint) !important;
+    padding: 0.85rem 1.1rem;
+    background: var(--cream-2);
+    border-radius: var(--radius-sm);
+    border-left: 2px solid var(--gold);
+  }
+  .results {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.85rem;
+    margin-top: 0.5rem;
+  }
+  .results li {
+    position: relative;
+    padding-left: 2rem;
+    color: var(--ink);
+    font-size: 1.05rem;
+    line-height: 1.55;
+  }
+  .results li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.35em;
+    width: 1rem;
+    height: 0.6rem;
+    border-left: 2.5px solid var(--gold-deep);
+    border-bottom: 2.5px solid var(--gold-deep);
+    transform: rotate(-45deg);
+  }
+
+  .did .eyebrow,
+  .did .section-head h2 {
+    color: var(--on-dark);
+  }
+  .did .eyebrow {
+    color: var(--gold);
+  }
+  .did__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.5rem;
+  }
+  .did__step {
+    display: flex;
+    gap: 1.25rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--gold-line);
+  }
+  .did__step:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+  .did__n {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+  .did__t {
+    font-size: 1.2rem;
+    color: var(--on-dark);
+    margin-bottom: 0.5rem;
+  }
+  .did__d {
+    color: var(--on-dark-muted);
+    line-height: 1.6;
+  }
+
+  .case-svc__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+  .case-svc__card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .case-svc__card:hover {
+      border-color: var(--gold);
+      box-shadow: var(--shadow-md);
+    }
+  }
+  .case-svc__icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    color: var(--gold-deep);
+    background: var(--gold-soft);
+    border-radius: 12px;
+  }
+  .case-svc__body {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .case-svc__name {
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .case-svc__desc {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+  .case-svc__arrow {
+    margin-left: auto;
+    color: var(--text-faint);
+    flex-shrink: 0;
+    transition: transform 0.25s var(--ease), color 0.25s var(--ease);
+  }
+  .case-svc__card:hover .case-svc__arrow {
+    transform: translateX(3px);
+    color: var(--gold-deep);
+  }
+
+  .cases-rel .eyebrow,
+  .cases-rel .section-head h2 {
+    color: var(--on-dark);
+  }
+  .cases-rel .eyebrow {
+    color: var(--gold);
+  }
+  .cases-rel__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+</style>

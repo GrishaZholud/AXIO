@@ -1,0 +1,176 @@
+---
+import { site, nav } from '../lib/site';
+import { serviceGroups, servicesByGroup } from '../data/services';
+// Copyright span: founding year → current year (collapses to one if equal).
+const currentYear = new Date().getFullYear();
+const copyrightYears =
+  currentYear > site.foundingYear
+    ? `${site.foundingYear}–${currentYear}`
+    : `${site.foundingYear}`;
+---
+
+<footer class="site-footer" data-theme="dark">
+  <div class="container site-footer__inner">
+    <div class="site-footer__brand">
+      <img src="/images/logo-light.png" alt="AXIO" class="site-footer__logo" width="116" height="41" />
+      <p class="site-footer__about">
+        Digital-агентство полного цикла. Создаём сайты, продвигаем бизнес и
+        внедряем ИИ-решения с {site.foundingYear} года.
+      </p>
+      <div class="site-footer__social">
+        <a href={site.social.telegram} rel="noopener" target="_blank">Telegram</a>
+        <a href={site.social.dzen} rel="noopener" target="_blank">Дзен</a>
+      </div>
+    </div>
+
+    <nav class="site-footer__cols" aria-label="Услуги">
+      {
+        serviceGroups.map((group) => (
+          <div class="site-footer__col">
+            <p class="site-footer__heading">{group}</p>
+            <ul>
+              {servicesByGroup(group).map((s) => (
+                <li>
+                  <a href={`/${s.slug}`}>{s.label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+      <div class="site-footer__col">
+        <p class="site-footer__heading">Контакты</p>
+        <ul>
+          <li><a href={`tel:${site.phoneHref}`}>{site.phone}</a></li>
+          <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+          <li><span class="site-footer__muted">{site.address.street}, {site.address.city}</span></li>
+          <li><span class="site-footer__muted">{site.hours}</span></li>
+        </ul>
+      </div>
+    </nav>
+  </div>
+
+  <div class="container site-footer__bottom">
+    <p class="site-footer__copy">© {copyrightYears} {site.name}. Все права защищены.</p>
+    <ul class="site-footer__legal">
+      {nav.legal.map((l) => (
+        <li><a href={l.href}>{l.label}</a></li>
+      ))}
+    </ul>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--ink);
+    color: var(--on-dark-muted);
+    padding-top: clamp(3rem, 6vw, 5rem);
+    border-top: 1px solid var(--gold-line);
+  }
+  .site-footer__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 2.7fr);
+    gap: clamp(2rem, 5vw, 4rem);
+    padding-bottom: 3rem;
+  }
+  .site-footer__logo {
+    height: 34px;
+    width: auto;
+    display: block;
+  }
+  .site-footer__about {
+    margin-top: 1rem;
+    max-width: 34ch;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .site-footer__social {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .site-footer__social a {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gold);
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--gold-line);
+    transition: border-color 0.2s var(--ease);
+  }
+  .site-footer__social a:hover {
+    border-color: var(--gold);
+  }
+
+  .site-footer__cols {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+  .site-footer__heading {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-label);
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  .site-footer__cols ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+  .site-footer__cols a {
+    font-size: 0.9rem;
+    color: var(--on-dark-muted);
+    transition: color 0.18s var(--ease);
+  }
+  .site-footer__cols a:hover {
+    color: var(--on-dark);
+  }
+  .site-footer__muted {
+    font-size: 0.9rem;
+    color: var(--on-dark-faint);
+  }
+
+  .site-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 1.5rem;
+    border-top: 1px solid rgba(196, 166, 117, 0.14);
+    font-size: 0.82rem;
+  }
+  .site-footer__copy {
+    color: var(--on-dark-faint);
+  }
+  .site-footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    list-style: none;
+    padding: 0;
+  }
+  .site-footer__legal a {
+    color: var(--on-dark-muted);
+  }
+  .site-footer__legal a:hover {
+    color: var(--gold);
+  }
+
+  @media (max-width: 860px) {
+    .site-footer__inner {
+      grid-template-columns: 1fr;
+    }
+    .site-footer__cols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 460px) {
+    .site-footer__cols {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

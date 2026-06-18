@@ -1,0 +1,200 @@
+---
+// Custom direction picker. Replaces the native <select> because its open
+// option list is OS-rendered and can't be themed. Submits via a hidden input
+// named "direction" (FormData-compatible). Keyboard + click accessible.
+import { services } from '../data/services';
+
+export interface Props {
+  /** Slug to preselect (e.g. on a service page) */
+  value?: string;
+  id?: string;
+}
+const { value, id = 'direction' } = Astro.props;
+const preset = services.find((s) => s.slug === value);
+const options = [
+  ...services.map((s) => s.label),
+  'Другое / не определился',
+];
+const current = preset?.label ?? '';
+---
+
+<div class="dsel" data-dsel>
+  <input type="hidden" name="direction" value={current} data-dsel-input />
+  <button
+    type="button"
+    class="dsel__btn"
+    id={id}
+    aria-haspopup="listbox"
+    aria-expanded="false"
+    data-dsel-btn
+  >
+    <span class="dsel__label" data-dsel-label data-placeholder={current ? undefined : ''}>
+      {current || 'Выберите направление'}
+    </span>
+    <svg class="dsel__chev" width="13" height="13" viewBox="0 0 12 12" aria-hidden="true">
+      <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+    </svg>
+  </button>
+  <ul class="dsel__list" role="listbox" tabindex="-1" data-dsel-list hidden>
+    {
+      options.map((opt) => (
+        <li
+          role="option"
+          class="dsel__opt"
+          data-value={opt}
+          aria-selected={opt === current ? 'true' : 'false'}
+        >
+          {opt}
+        </li>
+      ))
+    }
+  </ul>
+</div>
+
+<style>
+  .dsel {
+    position: relative;
+  }
+  .dsel__btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  }
+  .dsel__btn:focus-visible {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-soft);
+  }
+  .dsel.is-open .dsel__btn {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-soft);
+  }
+  .dsel__label[data-placeholder] {
+    color: var(--text-faint);
+  }
+  .dsel__chev {
+    flex-shrink: 0;
+    color: var(--gold-deep);
+    transition: transform 0.22s var(--ease-out);
+  }
+  .dsel.is-open .dsel__chev {
+    transform: rotate(180deg);
+  }
+
+  .dsel__list {
+    position: absolute;
+    z-index: 20;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    max-height: 240px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0.4rem;
+    list-style: none;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 18px 44px rgba(26, 26, 23, 0.16);
+    transform-origin: top center;
+    animation: dsel-in 0.18s var(--ease-out);
+  }
+  @keyframes dsel-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+    }
+  }
+  .dsel__opt {
+    padding: 0.65rem 0.8rem;
+    border-radius: 8px;
+    font-size: 0.93rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s var(--ease), color 0.15s var(--ease);
+  }
+  .dsel__opt:hover,
+  .dsel__opt.is-active {
+    background: var(--cream-2);
+    color: var(--ink);
+  }
+  .dsel__opt[aria-selected='true'] {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .dsel__opt[aria-selected='true']::after {
+    content: '✓';
+    float: right;
+    color: var(--gold-deep);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-dsel]').forEach((dsel) => {
+    const btn = dsel.querySelector<HTMLButtonElement>('[data-dsel-btn]')!;
+    const list = dsel.querySelector<HTMLUListElement>('[data-dsel-list]')!;
+    const input = dsel.querySelector<HTMLInputElement>('[data-dsel-input]')!;
+    const label = dsel.querySelector<HTMLElement>('[data-dsel-label]')!;
+    const opts = Array.from(dsel.querySelectorAll<HTMLLIElement>('.dsel__opt'));
+    let active = -1;
+
+    const setActive = (i: number) => {
+      opts.forEach((o) => o.classList.remove('is-active'));
+      active = (i + opts.length) % opts.length;
+      opts[active].classList.add('is-active');
+      opts[active].scrollIntoView({ block: 'nearest' });
+    };
+    const open = () => {
+      list.hidden = false;
+      btn.setAttribute('aria-expanded', 'true');
+      dsel.classList.add('is-open');
+      const sel = opts.findIndex((o) => o.getAttribute('aria-selected') === 'true');
+      setActive(sel >= 0 ? sel : 0);
+    };
+    const close = () => {
+      list.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+      dsel.classList.remove('is-open');
+    };
+    const choose = (opt: HTMLLIElement) => {
+      input.value = opt.dataset.value || '';
+      label.textContent = opt.textContent;
+      label.removeAttribute('data-placeholder');
+      opts.forEach((o) => o.setAttribute('aria-selected', 'false'));
+      opt.setAttribute('aria-selected', 'true');
+      close();
+      btn.focus();
+    };
+
+    btn.addEventListener('click', () => (list.hidden ? open() : close()));
+    opts.forEach((opt, i) => {
+      opt.addEventListener('click', () => choose(opt));
+      opt.addEventListener('mousemove', () => setActive(i));
+    });
+    document.addEventListener('click', (e) => {
+      if (!dsel.contains(e.target as Node)) close();
+    });
+    btn.addEventListener('keydown', (e) => {
+      if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) {
+        e.preventDefault();
+        if (list.hidden) open();
+        else if (e.key === 'ArrowDown') setActive(active + 1);
+        else if (e.key === 'ArrowUp') setActive(active - 1);
+        else choose(opts[active]);
+      } else if (e.key === 'Escape') {
+        close();
+      }
+    });
+  });
+</script>

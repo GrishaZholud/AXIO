@@ -1,0 +1,209 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import CtaForm from '../components/CtaForm.astro';
+import { site } from '../lib/site';
+import { breadcrumbSchema, type Crumb } from '../lib/schema';
+
+const crumbs: Crumb[] = [
+  { name: 'Главная', href: '/' },
+  { name: 'Контакты', href: '/contacts' },
+];
+const schema = [breadcrumbSchema(crumbs)];
+
+const channels = [
+  {
+    label: 'Telegram',
+    value: site.social.telegramHandle,
+    note: 'Пишите — отвечаем быстро',
+    href: site.social.telegram,
+    external: true,
+    icon: '<path d="M21.5 4.5 2.8 11.6c-.8.3-.8 1.4 0 1.7l4.6 1.5 1.8 5.4c.2.7 1.1.9 1.6.3l2.5-2.7 4.7 3.5c.6.4 1.4.1 1.6-.6L23 5.6c.2-.9-.7-1.5-1.5-1.1Z"/><path d="m8 14 9-6-7 7"/>',
+  },
+  {
+    label: 'WhatsApp',
+    value: site.phone,
+    note: 'Для голосовых и сообщений',
+    href: `https://wa.me/${site.phoneHref.replace('+', '')}`,
+    external: true,
+    icon: '<path d="M12 3a9 9 0 0 0-7.7 13.7L3 21l4.5-1.2A9 9 0 1 0 12 3Z"/><path d="M8.5 8.5c-.3 1 0 2.2.9 3.4a9 9 0 0 0 3 2.7c1 .5 1.8.5 2.4-.1l.6-.7-2-1.3-.8.8a6 6 0 0 1-2-1.9l.8-.8-1.3-2-.7.6Z"/>',
+  },
+  {
+    label: 'E-mail',
+    value: site.email,
+    note: 'Для официальных запросов',
+    href: `mailto:${site.email}`,
+    icon: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  },
+  {
+    label: 'Телефон',
+    value: site.phone,
+    note: site.hours,
+    href: `tel:${site.phoneHref}`,
+    icon: '<path d="M5 4h3l1.5 4-2 1.5a11 11 0 0 0 5 5l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/>',
+  },
+  {
+    label: 'Адрес',
+    value: 'ул. Хомякова, 14',
+    note: `${site.address.city}, ${site.address.postalCode}`,
+    href: site.social.yandexMaps,
+    external: true,
+    icon: '<path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/>',
+  },
+  {
+    label: 'Режим работы',
+    value: site.hours,
+    note: 'Ответим в течение часа',
+    icon: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+  },
+];
+
+const mapSrc = `https://yandex.ru/map-widget/v1/?ll=${site.address.lng}%2C${site.address.lat}&z=16&pt=${site.address.lng}%2C${site.address.lat}%2Cpm2rdm`;
+---
+
+<BaseLayout
+  title="Контакты AXIO — свяжитесь с нами"
+  description="Свяжитесь с командой AXIO: Telegram, WhatsApp, e-mail, телефон. Ответим в течение часа в рабочее время. Бесплатная консультация по вашему проекту."
+  path="/contacts"
+  schema={schema}
+>
+  <section class="contacts-hero">
+    <div class="container">
+      <div class="contacts-hero__crumbs"><Breadcrumbs crumbs={crumbs} /></div>
+      <span class="eyebrow">Контакты</span>
+      <h1 class="h1 contacts-hero__title">Свяжитесь с AXIO</h1>
+      <p class="lead contacts-hero__lead">
+        Ответим в течение часа в рабочее время. Выберите удобный канал — или
+        оставьте заявку, и мы перезвоним сами.
+      </p>
+    </div>
+  </section>
+
+  <section class="section contacts-body">
+    <div class="container contacts-grid">
+      <div class="contacts-channels">
+        {
+          channels.map((ch) => {
+            const Tag = ch.href ? 'a' : 'div';
+            return (
+              <Tag
+                class="contact-card"
+                href={ch.href}
+                target={ch.external ? '_blank' : undefined}
+                rel={ch.external ? 'noopener' : undefined}
+              >
+                <span class="contact-card__icon">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" set:html={ch.icon} />
+                </span>
+                <span class="contact-card__body">
+                  <span class="contact-card__label">{ch.label}</span>
+                  <span class="contact-card__value">{ch.value}</span>
+                  <span class="contact-card__note">{ch.note}</span>
+                </span>
+              </Tag>
+            );
+          })
+        }
+      </div>
+
+      <div class="contacts-map">
+        <iframe
+          title="AXIO на Яндекс Картах"
+          src={mapSrc}
+          loading="lazy"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+  </section>
+
+  <CtaForm
+    title="Оставьте заявку"
+    text="Заполните форму — свяжемся в течение часа и предложим решение под вашу задачу."
+  />
+</BaseLayout>
+
+<style>
+  .contacts-hero {
+    padding-top: clamp(2.5rem, 5vw, 3.5rem);
+    padding-bottom: clamp(1.5rem, 3vw, 2rem);
+  }
+  .contacts-hero__crumbs {
+    margin-bottom: 1.75rem;
+  }
+  .contacts-hero__title {
+    margin-block: 1rem 1.1rem;
+  }
+  .contacts-hero__lead {
+    max-width: 56ch;
+  }
+
+  .contacts-grid {
+    display: grid;
+    gap: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .contacts-channels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 1rem;
+  }
+  .contact-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+  a.contact-card:hover {
+    border-color: var(--gold);
+    box-shadow: var(--shadow-md);
+  }
+  .contact-card__icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    color: var(--gold-deep);
+    background: var(--gold-soft);
+    border-radius: 12px;
+  }
+  .contact-card__body {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+  .contact-card__label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--gold-deep);
+  }
+  .contact-card__value {
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .contact-card__note {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .contacts-map {
+    height: clamp(360px, 42vw, 460px);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .contacts-map iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    filter: grayscale(0.15);
+  }
+</style>

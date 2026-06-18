@@ -1,0 +1,284 @@
+---
+// Shared template for a blog article. The page passes a slug and writes the
+// article body into the default slot (wrapped in .prose). This renders the
+// hero, cover, body, internal links (services + cases), FAQ and CTA, plus
+// Article / FAQ / Breadcrumb schema.
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Faq from '../components/Faq.astro';
+import CtaForm from '../components/CtaForm.astro';
+import CaseCard from '../components/CaseCard.astro';
+import Icon from '../components/Icon.astro';
+import { getPost } from '../data/posts';
+import { getService } from '../data/services';
+import { getCase } from '../data/cases';
+import { faqsByTopic } from '../data/faqs';
+import { site } from '../lib/site';
+import { articleSchema, faqSchema, breadcrumbSchema, type Crumb } from '../lib/schema';
+
+export interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+const post = getPost(slug)!;
+const faqs = faqsByTopic[post.faqTopic];
+const linkedServices = post.services.map((s) => getService(s)).filter(Boolean);
+const linkedCases = post.cases.map((c) => getCase(c)).filter(Boolean);
+
+const dateLabel = new Date(post.datePublished).toLocaleDateString('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+
+const crumbs: Crumb[] = [
+  { name: 'Главная', href: '/' },
+  { name: 'Блог', href: '/blog' },
+  { name: post.title, href: `/blog/${slug}` },
+];
+
+const schema = [
+  articleSchema({
+    headline: post.title,
+    description: post.description,
+    url: `${site.url}/blog/${slug}`,
+    image: post.cover,
+    datePublished: post.datePublished,
+    dateModified: post.dateModified,
+  }),
+  faqSchema(faqs),
+  breadcrumbSchema(crumbs),
+];
+---
+
+<BaseLayout
+  title={`${post.title} | Блог AXIO`}
+  description={post.description}
+  path={`/blog/${slug}`}
+  image={post.cover}
+  type="article"
+  schema={schema}
+>
+  <article class="post">
+    <header class="post__head">
+      <div class="container container--narrow">
+        <div class="post__crumbs"><Breadcrumbs crumbs={crumbs} /></div>
+        <span class="post__cat">{post.category}</span>
+        <h1 class="h1 post__title">{post.title}</h1>
+        <p class="lead post__excerpt">{post.excerpt}</p>
+        <p class="post__meta">
+          <span>{dateLabel}</span>
+          <span aria-hidden="true">·</span>
+          <span>{post.readingTime} чтения</span>
+          <span aria-hidden="true">·</span>
+          <span>AXIO</span>
+        </p>
+      </div>
+    </header>
+
+    <div class="container container--narrow">
+      <img class="post__cover" src={post.cover} alt={post.title} width="1200" height="675" />
+    </div>
+
+    <div class="container container--narrow">
+      <div class="prose"><slot /></div>
+    </div>
+
+    {
+      linkedServices.length > 0 && (
+        <div class="container container--narrow">
+          <aside class="post__links" aria-label="Услуги по теме">
+            <p class="post__links-title">Услуги по теме статьи</p>
+            <div class="post__links-grid">
+              {linkedServices.map((s) => (
+                <a href={`/${s!.slug}`} class="post__link">
+                  <span class="post__link-icon"><Icon name={s!.icon} size={20} /></span>
+                  <span>
+                    <span class="post__link-name">{s!.label}</span>
+                    <span class="post__link-desc">{s!.short}</span>
+                  </span>
+                </a>
+              ))}
+            </div>
+          </aside>
+        </div>
+      )
+    }
+  </article>
+
+  {
+    linkedCases.length > 0 && (
+      <section class="section cases-rel" data-theme="dark" aria-labelledby="post-cases-title">
+        <div class="container">
+          <div class="section-head reveal">
+            <span class="eyebrow">Кейсы по теме</span>
+            <h2 class="h2" id="post-cases-title">Как это работает на практике</h2>
+          </div>
+          <div class="cases-rel__grid reveal">
+            {linkedCases.map((c) => <CaseCard study={c!} />)}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <Faq items={faqs} title="Частые вопросы" eyebrow="FAQ" />
+  <CtaForm title="Не знаете, что подойдёт вам?" text="Разберём задачу и предложим оптимальное решение. Бесплатно, в течение часа." />
+</BaseLayout>
+
+<style>
+  .post {
+    padding-bottom: clamp(3rem, 6vw, 5rem);
+  }
+  .post__head {
+    padding-top: clamp(7rem, 14vh, 9.5rem);
+    padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .post__crumbs {
+    margin-bottom: 1.75rem;
+  }
+  .post__cat {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--gold-deep);
+  }
+  .post__title {
+    margin-block: 1rem 1.1rem;
+  }
+  .post__excerpt {
+    max-width: 60ch;
+  }
+  .post__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+    font-size: 0.88rem;
+    color: var(--text-faint);
+  }
+  .post__cover {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    margin-block: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  /* Article typography */
+  .prose {
+    font-size: 1.075rem;
+    line-height: 1.75;
+    color: var(--text);
+  }
+  .prose :global(h2) {
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 1.9rem);
+    margin-block: 2.5rem 1rem;
+    color: var(--ink);
+  }
+  .prose :global(h3) {
+    font-size: 1.3rem;
+    margin-block: 2rem 0.75rem;
+    color: var(--ink);
+  }
+  .prose :global(p) {
+    margin-bottom: 1.25rem;
+    color: var(--text-muted);
+  }
+  .prose :global(p:first-of-type) {
+    color: var(--text);
+  }
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 1.5rem;
+    padding-left: 1.25rem;
+    color: var(--text-muted);
+  }
+  .prose :global(li) {
+    margin-bottom: 0.5rem;
+  }
+  .prose :global(a) {
+    color: var(--gold-deep);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .prose :global(blockquote) {
+    margin: 1.75rem 0;
+    padding-left: 1.25rem;
+    border-left: 2px solid var(--gold);
+    font-style: italic;
+    color: var(--ink);
+  }
+  .prose :global(strong) {
+    color: var(--ink);
+  }
+
+  .post__links {
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .post__links-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 1rem;
+  }
+  .post__links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.75rem;
+  }
+  .post__link {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    transition: border-color 200ms ease;
+  }
+  .post__link:hover {
+    border-color: var(--gold);
+  }
+  .post__link-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    color: var(--gold-deep);
+    background: var(--gold-soft);
+    border-radius: 10px;
+  }
+  .post__link-name {
+    display: block;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.95rem;
+  }
+  .post__link-desc {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+  }
+
+  .cases-rel .eyebrow,
+  .cases-rel .section-head h2 {
+    color: var(--on-dark);
+  }
+  .cases-rel .eyebrow {
+    color: var(--gold);
+  }
+  .cases-rel__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+</style>

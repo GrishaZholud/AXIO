@@ -1,0 +1,73 @@
+---
+// Visible breadcrumb trail. Emit the matching BreadcrumbList schema via the
+// page's <Seo schema> using breadcrumbSchema(crumbs) with the same array.
+import type { Crumb } from '../lib/schema';
+export interface Props {
+  crumbs: Crumb[];
+  dark?: boolean;
+}
+const { crumbs, dark = false } = Astro.props;
+---
+
+<nav class:list={['crumbs', { 'crumbs--dark': dark }]} aria-label="Хлебные крошки">
+  <ol class="crumbs__list">
+    {
+      crumbs.map((c, i) => (
+        <li class="crumbs__item">
+          {i < crumbs.length - 1 ? (
+            <a href={c.href}>{c.name}</a>
+          ) : (
+            <span aria-current="page">{c.name}</span>
+          )}
+          {i < crumbs.length - 1 && (
+            <svg class="crumbs__sep" width="6" height="10" viewBox="0 0 6 10" aria-hidden="true">
+              <path d="m1 1 4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+            </svg>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .crumbs__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    font-size: 0.85rem;
+  }
+  .crumbs__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-faint);
+  }
+  .crumbs a {
+    color: var(--text-muted);
+    transition: color 0.18s var(--ease);
+  }
+  .crumbs a:hover {
+    color: var(--gold-deep);
+  }
+  .crumbs [aria-current='page'] {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .crumbs__sep {
+    color: var(--text-faint);
+    opacity: 0.6;
+  }
+  .crumbs--dark a {
+    color: var(--on-dark-muted);
+  }
+  .crumbs--dark a:hover {
+    color: var(--gold);
+  }
+  .crumbs--dark [aria-current='page'] {
+    color: var(--on-dark);
+  }
+</style>

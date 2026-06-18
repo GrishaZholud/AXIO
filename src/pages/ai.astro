@@ -1,0 +1,9 @@
+---
+import ServicePage from '../layouts/ServicePage.astro';
+import AiSections from '../components/AiSections.astro';
+import { serviceContent } from '../data/serviceContent';
+---
+
+<ServicePage {...serviceContent.ai}>
+  <AiSections />
+</ServicePage>

@@ -1,0 +1,64 @@
+---
+// Yandex Metrika loaded ONLY after the user accepts cookies (152-ФЗ).
+// The counter id lives in site.ts. The script:
+//   1. on load, if consent is already 'accepted', initialises Metrika;
+//   2. otherwise waits for the `axio:cookie-accepted` event from CookieBar
+//      and initialises immediately when the user clicks «Принять».
+// Declining (or no choice) means the counter is never loaded.
+import { site } from '../lib/site';
+const id = site.metrikaId;
+---
+
+{
+  id && id !== '00000000' && (
+    <script is:inline define:vars={{ id }}>
+      (function () {
+        var KEY = 'axio-cookie-choice';
+        var loaded = false;
+
+        function loadMetrika() {
+          if (loaded) return;
+          loaded = true;
+          (function (m, e, t, r, i, k, a) {
+            m[i] =
+              m[i] ||
+              function () {
+                (m[i].a = m[i].a || []).push(arguments);
+              };
+            m[i].l = 1 * new Date();
+            for (var j = 0; j < e.scripts.length; j++) {
+              if (e.scripts[j].src === r) return;
+            }
+            (k = e.createElement(t)),
+              (a = e.getElementsByTagName(t)[0]),
+              (k.async = 1),
+              (k.src = r),
+              a.parentNode.insertBefore(k, a);
+          })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+
+          ym(id, 'init', {
+            clickmap: true,
+            trackLinks: true,
+            accurateTrackBounce: true,
+            webvisor: true,
+          });
+        }
+
+        if (localStorage.getItem(KEY) === 'accepted') {
+          loadMetrika();
+        } else {
+          window.addEventListener('axio:cookie-accepted', loadMetrika, { once: true });
+        }
+      })();
+    </script>
+    <noscript>
+      <div>
+        <img
+          src={`https://mc.yandex.ru/watch/${id}`}
+          style="position:absolute;left:-9999px"
+          alt=""
+        />
+      </div>
+    </noscript>
+  )
+}

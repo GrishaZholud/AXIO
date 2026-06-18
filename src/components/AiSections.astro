@@ -1,0 +1,349 @@
+---
+// AI-page-specific sections (slotted into ServicePage on /ai):
+// «Что мы внедряем», «Где общается ИИ-агент», «ИИ-агент для вашей ниши»,
+// «ИИ-агент vs живой сотрудник». Content migrated from the original site.
+import Icon from './Icon.astro';
+
+const implement = [
+  { icon: 'message', t: 'ИИ-чат-бот для сайта', d: 'Отвечает на вопросы, принимает заявки и консультирует посетителей 24/7. Знает всё о вашем бизнесе и говорит в вашем стиле.' },
+  { icon: 'spark', t: 'ИИ в соцсетях', d: 'Генерирует идеи для постов, пишет черновики, создаёт контент-план и отвечает на типовые комментарии. Экономит до 70% времени SMM.' },
+  { icon: 'flow', t: 'ИИ в CRM', d: 'Интеграция с amoCRM и Битрикс24. ИИ квалифицирует лиды, заполняет карточки, пишет follow-up письма и резюмирует переговоры.' },
+  { icon: 'chart', t: 'Анализ данных', d: 'Загружаете отчёты — ИИ находит закономерности, объясняет причины и даёт рекомендации на понятном языке, без программистов.' },
+  { icon: 'message', t: 'Транскрипции и резюме звонков', d: 'Записи созвонов автоматически превращаются в текст, ключевые договорённости и задачи выделяются отдельно. Ничего не теряется.' },
+  { icon: 'layout', t: 'Обработка входящих заявок', d: 'ИИ читает письма и сообщения, классифицирует их, расставляет приоритеты и маршрутизирует нужному сотруднику автоматически.' },
+  { icon: 'target', t: 'Автономные ИИ-агенты', d: 'Помощники, которые выполняют многошаговые задачи: собирают данные, принимают решения и действуют без участия человека.' },
+  { icon: 'megaphone', t: 'ИИ-продажник для обзвона', d: 'Голосовой агент обзванивает тёплую базу, отвечает на вопросы и передаёт горячих лидов менеджеру. Работает на Яндекс SpeechKit + GPT.' },
+];
+
+const channels = [
+  { t: 'Telegram', d: 'Самый популярный канал в России. Быстро, удобно, без лишних шагов.' },
+  { t: 'WhatsApp', d: 'Через официальный WhatsApp Business API. Идеально для b2c-сегмента.' },
+  { t: 'ВКонтакте', d: 'Сообщения сообщества автоматически обрабатываются ИИ через VK API.' },
+  { t: 'Сайт', d: 'Виджет чата на вашем сайте — встраивается за 15 минут на любую CMS.' },
+  { t: 'Email', d: 'Автоматические ответы и цепочки писем, персонализированные под клиента.' },
+];
+
+const niches = [
+  { t: 'Медицинская клиника', who: 'Клиники, стоматологии, частные врачи', items: ['Запись на приём 24/7', 'Напоминания о визите', 'FAQ по услугам и ценам', 'Сбор анамнеза перед приёмом', 'Повторные приглашения пациентов'] },
+  { t: 'Юридическая фирма', who: 'Адвокаты, нотариусы, юридические бюро', items: ['Первичная квалификация дела', 'Сбор документов от клиента', 'FAQ по типовым ситуациям', 'Запись на консультацию', 'Резюме встреч и договорённостей'] },
+  { t: 'Агентство недвижимости', who: 'Риелторы, застройщики, УК', items: ['Подбор объектов по параметрам', 'Запись на просмотр', 'Квалификация лида: бюджет, район, цели', 'Напоминания и уведомления'] },
+  { t: 'Интернет-магазин', who: 'E-commerce, маркетплейсы, розница', items: ['Статус и отслеживание заказа', 'Возвраты и обмены', 'Рекомендации товаров', 'Обработка жалоб и рекламаций', 'Повторные продажи и допродажи'] },
+  { t: 'Ресторан и кофейня', who: 'HoReCa, доставка еды, кейтеринг', items: ['Бронирование столиков', 'Приём предзаказов', 'Меню, состав и аллергены', 'Запись на мастер-классы', 'Напоминания о бронировании'] },
+];
+
+const vs = [
+  { c: 'Стоимость запуска', ai: 'Разовая оплата разработки', emp: 'Поиск, обучение, адаптация' },
+  { c: 'Ежемесячные расходы', ai: 'Только стоимость API', emp: 'Зарплата + налоги + соцпакет' },
+  { c: 'Время работы', ai: '24/7, без выходных', emp: '8 часов, 5 дней в неделю' },
+  { c: 'Скорость ответа', ai: 'Мгновенно', emp: 'Минуты или часы' },
+  { c: 'Масштабирование', ai: '1000 диалогов одновременно', emp: 'Нужен новый сотрудник' },
+  { c: 'Больничные и отпуска', ai: 'Не бывает', emp: '28 дней отпуска + больничные' },
+  { c: 'Обучение при изменениях', ai: 'Обновление базы знаний за 1 час', emp: 'Обучение, проверка, контроль' },
+  { c: 'Сложные переговоры', ai: 'Передаёт менеджеру', emp: 'Справляется самостоятельно' },
+  { c: 'Эмпатия и отношения', ai: 'Ограничена', emp: 'Полноценная' },
+];
+---
+
+<!-- Что мы внедряем -->
+<section class="section ai-impl" aria-labelledby="ai-impl-title">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Что мы внедряем</span>
+      <h2 class="h2" id="ai-impl-title">Восемь направлений ИИ для бизнеса</h2>
+      <p class="lead">От простого чат-бота до автономного ИИ-агента — подбираем под вашу задачу.</p>
+    </div>
+    <div class="ai-grid reveal">
+      {implement.map((it) => (
+        <article class="ai-card">
+          <span class="ai-card__icon"><Icon name={it.icon} size={22} /></span>
+          <h3 class="ai-card__t">{it.t}</h3>
+          <p class="ai-card__d">{it.d}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- Где общается ИИ-агент -->
+<section class="section ai-ch" data-theme="dark" aria-labelledby="ai-ch-title">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Каналы</span>
+      <h2 class="h2" id="ai-ch-title">Где общается ИИ-агент</h2>
+      <p class="lead">Реализуемые каналы — без экзотики и нереалистичных обещаний.</p>
+    </div>
+    <div class="ai-ch__grid reveal">
+      {channels.map((c) => (
+        <article class="ai-ch__card">
+          <h3 class="ai-ch__t">{c.t}</h3>
+          <p class="ai-ch__d">{c.d}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ИИ-агент для вашей ниши -->
+<section class="section ai-niche" aria-labelledby="ai-niche-title">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Применение</span>
+      <h2 class="h2" id="ai-niche-title">ИИ-агент для вашей ниши</h2>
+      <p class="lead">Пять направлений, где ИИ даёт наибольший эффект прямо сейчас.</p>
+    </div>
+    <div class="ai-niche__grid reveal">
+      {niches.map((n, i) => (
+        <article class="ai-niche__card">
+          <span class="ai-niche__num">{String(i + 1).padStart(2, '0')} / 05</span>
+          <h3 class="ai-niche__t">{n.t}</h3>
+          <p class="ai-niche__who">{n.who}</p>
+          <ul class="ai-niche__list">
+            {n.items.map((it) => <li>{it}</li>)}
+          </ul>
+        </article>
+      ))}
+      <article class="ai-niche__card ai-niche__card--cta">
+        <h3 class="ai-niche__t">Ваша ниша не в списке?</h3>
+        <p class="ai-niche__who">Работаем и с другими сферами — обсудим вашу задачу.</p>
+        <button type="button" class="btn btn--gold" data-lead-open>Обсудить вашу нишу</button>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ИИ-агент vs живой сотрудник -->
+<section class="section ai-vs" data-theme="dark" aria-labelledby="ai-vs-title">
+  <div class="container">
+    <div class="section-head section-head--center reveal">
+      <span class="eyebrow">Сравнение</span>
+      <h2 class="h2" id="ai-vs-title">ИИ-агент vs живой сотрудник</h2>
+      <p class="lead">Честное сравнение — без преувеличений.</p>
+    </div>
+    <div class="ai-vs__scroll reveal">
+      <table class="ai-vs__table">
+        <thead>
+          <tr>
+            <th scope="col"></th>
+            <th scope="col" class="is-ai">ИИ-агент</th>
+            <th scope="col">Сотрудник</th>
+          </tr>
+        </thead>
+        <tbody>
+          {vs.map((r) => (
+            <tr>
+              <th scope="row">{r.c}</th>
+              <td class="is-ai">{r.ai}</td>
+              <td>{r.emp}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Что мы внедряем */
+  .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .ai-card {
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .ai-card:hover {
+      border-color: var(--gold);
+      box-shadow: var(--shadow-md);
+    }
+  }
+  .ai-card__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    color: var(--gold-deep);
+    background: var(--gold-soft);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+  .ai-card__t {
+    font-size: 1.08rem;
+    color: var(--fg);
+    margin-bottom: 0.5rem;
+  }
+  .ai-card__d {
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+    line-height: 1.55;
+  }
+
+  /* Каналы */
+  .ai-ch .eyebrow,
+  .ai-ch .section-head h2 {
+    color: var(--on-dark);
+  }
+  .ai-ch .eyebrow {
+    color: var(--gold);
+  }
+  .ai-ch .lead {
+    color: var(--on-dark-muted);
+  }
+  .ai-ch__grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+  }
+  @media (max-width: 1080px) {
+    .ai-ch__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 640px) {
+    .ai-ch__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .ai-ch__card {
+    padding: 1.5rem;
+    background: var(--ink-2);
+    border: 1px solid var(--gold-line);
+    border-radius: var(--radius);
+  }
+  .ai-ch__t {
+    font-size: 1.05rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .ai-ch__d {
+    font-size: 0.9rem;
+    color: var(--on-dark-muted);
+    line-height: 1.55;
+  }
+
+  /* Ниши */
+  .ai-niche__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+  .ai-niche__card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .ai-niche__num {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--gold-deep);
+    margin-bottom: 0.75rem;
+  }
+  .ai-niche__t {
+    font-size: 1.2rem;
+    color: var(--fg);
+    margin-bottom: 0.3rem;
+  }
+  .ai-niche__who {
+    font-size: 0.85rem;
+    color: var(--fg-muted);
+    margin-bottom: 1rem;
+  }
+  .ai-niche__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .ai-niche__list li {
+    position: relative;
+    padding-left: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+    line-height: 1.45;
+  }
+  .ai-niche__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.45em;
+    width: 0.8rem;
+    height: 0.45rem;
+    border-left: 2px solid var(--gold);
+    border-bottom: 2px solid var(--gold);
+    transform: rotate(-45deg);
+  }
+  .ai-niche__card--cta {
+    justify-content: center;
+    align-items: flex-start;
+    gap: 0.5rem;
+    background: linear-gradient(180deg, rgba(196, 166, 117, 0.1), rgba(196, 166, 117, 0.02));
+    border-color: var(--gold);
+  }
+  .ai-niche__card--cta .btn {
+    margin-top: 0.75rem;
+  }
+
+  /* vs сотрудник */
+  .ai-vs .eyebrow,
+  .ai-vs .section-head h2 {
+    color: var(--on-dark);
+  }
+  .ai-vs .eyebrow {
+    color: var(--gold);
+  }
+  .ai-vs .lead {
+    color: var(--on-dark-muted);
+  }
+  .ai-vs__scroll {
+    overflow-x: auto;
+    border: 1px solid var(--gold-line);
+    border-radius: var(--radius);
+  }
+  .ai-vs__table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    background: var(--ink-2);
+  }
+  .ai-vs__table th,
+  .ai-vs__table td {
+    padding: 0.95rem 1.25rem;
+    text-align: left;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(196, 166, 117, 0.14);
+    font-size: 0.92rem;
+  }
+  .ai-vs__table thead th {
+    font-weight: 700;
+    color: var(--on-dark);
+    font-size: 1rem;
+  }
+  .ai-vs__table tbody th {
+    font-weight: 600;
+    color: var(--on-dark);
+  }
+  .ai-vs__table td {
+    color: var(--on-dark-muted);
+  }
+  .ai-vs__table tbody tr:last-child th,
+  .ai-vs__table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .ai-vs__table .is-ai {
+    background: var(--gold-soft);
+    color: var(--on-dark);
+  }
+  .ai-vs__table td.is-ai {
+    font-weight: 600;
+  }
+</style>

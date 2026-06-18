@@ -1,0 +1,225 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import CaseCard from '../components/CaseCard.astro';
+import FaqTabs from '../components/FaqTabs.astro';
+import CtaForm from '../components/CtaForm.astro';
+import HeroBackground from '../components/HeroBackground.astro';
+import { serviceGroups, servicesByGroup, services } from '../data/services';
+import { featuredCases } from '../data/cases';
+import { faqsByTopic } from '../data/faqs';
+import { site } from '../lib/site';
+import { faqSchema, serviceSchema } from '../lib/schema';
+
+// Tabbed FAQ by direction (issue: пользователь выбирает направление)
+const faqTabs = [
+  { label: 'Общие', items: faqsByTopic.general },
+  { label: 'Сайты', items: faqsByTopic.websites },
+  { label: 'SEO', items: faqsByTopic.seo },
+  { label: 'Таргет', items: faqsByTopic.target },
+  { label: 'Маркетплейсы', items: faqsByTopic.marketplaces },
+  { label: 'Карты', items: faqsByTopic.maps },
+];
+const allFaqs = faqTabs.flatMap((t) => t.items);
+
+const groupTagline: Record<string, string> = {
+  Сайты: 'Создаём сайты, которые приносят результат',
+  Маркетинг: 'Привлекаем клиентов и увеличиваем продажи',
+  Площадки: 'Выводим бизнес на новые платформы',
+};
+
+const schema = [
+  faqSchema(allFaqs),
+  ...services
+    .slice(0, 6)
+    .map((s) =>
+      serviceSchema({ name: s.label, description: s.short, url: `${site.url}/${s.slug}` })
+    ),
+];
+---
+
+<BaseLayout
+  title="AXIO — Разработка сайтов и digital-маркетинг в Екатеринбурге"
+  description="AXIO — digital-агентство полного цикла в Екатеринбурге. Сайты на коде и Tilda, SEO в Яндексе и Google, таргет, маркетплейсы, продвижение на картах и внедрение ИИ. 150+ проектов."
+  path="/"
+  image="/images/og/home.jpg"
+  keywords="разработка сайтов екатеринбург, digital агентство, создание сайтов, seo продвижение, таргетированная реклама, продвижение на маркетплейсах, внедрение ии в бизнес"
+  heroHeader={true}
+  schema={schema}
+>
+  <!-- ============================ Hero ============================ -->
+  <section class="hero" data-theme="dark">
+    <HeroBackground />
+    <div class="container hero__inner">
+      <span class="eyebrow reveal">Digital-агентство полного цикла · Екатеринбург</span>
+      <h1 class="h1 hero__title reveal">
+        Сайты и маркетинг,<br />которые приносят <span class="hero__accent">результат</span>
+      </h1>
+      <p class="lead hero__lead reveal">
+        Разрабатываем сайты, запускаем рекламу, выводим бизнес в топ поиска и на
+        маркетплейсы. Работаем на рост вашей выручки — а не ради красивых отчётов.
+      </p>
+      <div class="hero__actions reveal">
+        <button type="button" class="btn btn--gold btn--lg" data-lead-open>Обсудить проект</button>
+        <a href="/cases" class="btn btn--ghost btn--lg">Смотреть кейсы</a>
+      </div>
+      <dl class="hero__stats reveal">
+        <div><dt>2 года</dt><dd>на рынке digital</dd></div>
+        <div><dt>150+</dt><dd>реализованных проектов</dd></div>
+        <div><dt>11</dt><dd>направлений под ключ</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ========================= Services ========================= -->
+  <section class="section" aria-labelledby="services-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Услуги</span>
+        <h2 class="h2" id="services-title">Полный спектр digital-услуг</h2>
+        <p class="lead">
+          От разработки сайта до продвижения на маркетплейсах — закрываем все
+          задачи роста под ключ, без подрядчиков-посредников.
+        </p>
+      </div>
+
+      {
+        serviceGroups.map((group) => (
+          <div class="services-group reveal">
+            <div class="services-group__head">
+              <h3 class="h3">{group}</h3>
+              <p>{groupTagline[group]}</p>
+            </div>
+            <div class="services-group__grid">
+              {servicesByGroup(group).map((s) => (
+                <ServiceCard service={s} />
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- ========================== Cases ========================== -->
+  <section class="section cases-preview" data-theme="dark" aria-labelledby="cases-title">
+    <div class="container">
+      <div class="section-head reveal">
+        <span class="eyebrow">Кейсы клиентов</span>
+        <h2 class="h2" id="cases-title">Реальные цифры реальных проектов</h2>
+        <p class="lead">Не обещания, а измеримый результат — собранный в аналитике клиентов.</p>
+      </div>
+      <div class="cases-preview__grid reveal">
+        {featuredCases.map((c) => <CaseCard study={c} />)}
+      </div>
+      <div class="cases-preview__more reveal">
+        <a href="/cases" class="btn btn--ghost">Все кейсы</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================== FAQ =========================== -->
+  <FaqTabs tabs={faqTabs} />
+
+  <!-- =========================== CTA =========================== -->
+  <CtaForm />
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: var(--ink);
+    padding-top: clamp(8rem, 16vh, 11rem);
+    padding-bottom: clamp(4rem, 9vw, 7rem);
+  }
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 880px;
+  }
+  .hero .eyebrow {
+    color: var(--gold);
+  }
+  .hero__title {
+    color: var(--on-dark);
+    margin-block: 1.5rem 1.5rem;
+  }
+  .hero__accent {
+    color: var(--gold);
+  }
+  .hero__lead {
+    color: var(--on-dark-muted);
+    max-width: 60ch;
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+  .hero__stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(2rem, 6vw, 4rem);
+    margin-top: 3.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid var(--gold-line);
+  }
+  .hero__stats dt {
+    font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--gold);
+  }
+  .hero__stats dd {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: var(--on-dark-muted);
+  }
+
+  .services-group {
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  }
+  .services-group__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--line);
+  }
+  .services-group__head h3 {
+    color: var(--ink);
+  }
+  .services-group__head p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .services-group__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .cases-preview .section-head h2,
+  .cases-preview .eyebrow {
+    color: var(--on-dark);
+  }
+  .cases-preview .eyebrow {
+    color: var(--gold);
+  }
+  .cases-preview .lead {
+    color: var(--on-dark-muted);
+  }
+  .cases-preview__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
+  }
+  .cases-preview__more {
+    margin-top: 2.5rem;
+    text-align: center;
+  }
+</style>

@@ -1,0 +1,134 @@
+---
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { services } from '../data/services';
+import { serviceImages } from '../data/assets';
+export interface Props {
+  /** Current service slug — excluded from the list */
+  current: string;
+  /** How many to show */
+  limit?: number;
+}
+const { current, limit = 3 } = Astro.props;
+const publicDir = fileURLToPath(new URL('../../public/', import.meta.url));
+
+// Cover priority: 1) local file /public/images/services/<slug>.(jpg|jpeg|png|webp),
+// 2) URL from assets.ts, 3) generated branded thumbnail.
+const coverFor = (slug: string) => {
+  for (const ext of ['jpg', 'jpeg', 'png', 'webp']) {
+    if (existsSync(`${publicDir}images/services/${slug}.${ext}`)) {
+      return `/images/services/${slug}.${ext}`;
+    }
+  }
+  return serviceImages[slug] ?? `/images/thumb/${slug}.jpg`;
+};
+
+const others = services
+  .filter((s) => s.slug !== current)
+  .slice(0, limit)
+  .map((s) => ({ ...s, cover: coverFor(s.slug) }));
+---
+
+<section class="other section" aria-labelledby="other-title">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Ещё услуги</span>
+      <h2 class="h2" id="other-title">Другие направления AXIO</h2>
+    </div>
+    <div class="other__grid reveal">
+      {
+        others.map((s) => (
+          <a href={`/${s.slug}`} class="other__card">
+            <span class="other__cover">
+              <img
+                src={s.cover}
+                alt=""
+                loading="lazy"
+                width="640"
+                height="360"
+              />
+            </span>
+            <span class="other__body">
+              <span class="other__name">{s.label}</span>
+              <span class="other__desc">{s.short}</span>
+              <span class="other__link">
+                Подробнее
+                <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">
+                  <path d="M4 9h9M9 5l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .other__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+  .other__card {
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .other__card:hover {
+      border-color: var(--gold);
+      box-shadow: var(--shadow-md);
+    }
+  }
+  .other__cover {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 7;
+    overflow: hidden;
+  }
+  .other__cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s var(--ease);
+  }
+  .other__card:hover .other__cover img {
+    transform: scale(1.05);
+  }
+  .other__body {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.5rem;
+  }
+  .other__name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--fg);
+  }
+  .other__desc {
+    font-size: 0.9rem;
+    color: var(--fg-muted);
+    line-height: 1.45;
+  }
+  .other__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--gold-deep);
+  }
+  .other__card:hover .other__link svg {
+    transform: translateX(3px);
+  }
+  .other__link svg {
+    transition: transform 0.25s var(--ease);
+  }
+</style>

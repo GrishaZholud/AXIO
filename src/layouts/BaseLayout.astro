@@ -1,0 +1,85 @@
+---
+import '../styles/global.css';
+import Seo from '../components/Seo.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import LeadModal from '../components/LeadModal.astro';
+import CookieBar from '../components/CookieBar.astro';
+import Analytics from '../components/Analytics.astro';
+import { site } from '../lib/site';
+
+export interface Props {
+  title: string;
+  description: string;
+  path: string;
+  image?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+  keywords?: string;
+  schema?: object[];
+  /** Render the header transparent over a dark hero */
+  heroHeader?: boolean;
+}
+
+const { heroHeader = false, ...seo } = Astro.props;
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#1a1a17" />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png" />
+    <link rel="apple-touch-icon" href="/images/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <Seo {...seo} />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Перейти к содержимому</a>
+    <Header transparent={heroHeader} />
+    <main id="main" class:list={{ 'has-fixed-header': !heroHeader }}>
+      <slot />
+    </main>
+    <style>
+      /* Fixed header overlaps content on pages without a dark hero */
+      .has-fixed-header {
+        padding-top: var(--header-h);
+      }
+    </style>
+    <Footer />
+    <LeadModal />
+    <CookieBar />
+    <Analytics />
+
+    <!-- Reveal-on-scroll: progressive enhancement only -->
+    <script is:inline>
+      (function () {
+        if (!('IntersectionObserver' in window)) {
+          document
+            .querySelectorAll('.reveal')
+            .forEach((el) => el.classList.add('is-in'));
+          return;
+        }
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-in');
+                io.unobserve(e.target);
+              }
+            }
+          },
+          // Positive bottom margin fires the reveal ~15% of a viewport BEFORE
+          // the element enters view, so text is settled by the time it's read.
+          { rootMargin: '0px 0px 15% 0px', threshold: 0 }
+        );
+        document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+      })();
+    </script>
+  </body>
+</html>

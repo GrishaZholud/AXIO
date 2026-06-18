@@ -1,0 +1,173 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { servicesByGroup, serviceGroups } from '../data/services';
+
+const links = [
+  { icon: 'layout', label: 'Услуги', desc: 'Сайты, маркетинг и площадки', href: '/' },
+  { icon: 'chart', label: 'Кейсы', desc: 'Результаты наших проектов', href: '/cases' },
+  { icon: 'message', label: 'Блог', desc: 'Разборы, гайды и тренды', href: '/blog' },
+  { icon: 'pin', label: 'Контакты', desc: 'Связаться с командой', href: '/contacts' },
+];
+
+// A few popular services for quick recovery
+const popular = serviceGroups
+  .flatMap((g) => servicesByGroup(g))
+  .filter((s) => ['tilda', 'seo', 'target', 'marketplaces', 'ai', 'maps'].includes(s.slug));
+---
+
+<BaseLayout
+  title="Страница не найдена — 404 | AXIO"
+  description="К сожалению, такой страницы нет. Вернитесь на главную или выберите нужный раздел."
+  path="/404"
+  noindex
+>
+  <section class="nf">
+    <div class="container">
+      <span class="nf__code">404</span>
+      <h1 class="h1 nf__title">Такой страницы нет</h1>
+      <p class="lead nf__lead">
+        Возможно, ссылка устарела или в адресе опечатка. Ничего страшного —
+        вот куда можно перейти.
+      </p>
+
+      <div class="nf__links">
+        {links.map((l) => (
+          <a href={l.href} class="nf__card">
+            <span class="nf__icon"><Icon name={l.icon} size={22} /></span>
+            <span class="nf__card-body">
+              <span class="nf__card-name">{l.label}</span>
+              <span class="nf__card-desc">{l.desc}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+
+      <div class="nf__popular">
+        <span class="nf__popular-label">Популярные услуги</span>
+        <ul class="nf__tags">
+          {popular.map((s) => (
+            <li><a href={`/${s.slug}`}>{s.label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <a href="/" class="btn nf__home">← На главную</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    padding-top: clamp(7rem, 16vh, 10rem);
+    padding-bottom: clamp(4rem, 8vw, 6rem);
+    text-align: center;
+  }
+  .nf__code {
+    display: block;
+    font-size: clamp(4rem, 14vw, 8rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--gold-deep);
+  }
+  .nf__title {
+    margin-block: 1rem 1rem;
+  }
+  .nf__lead {
+    max-width: 48ch;
+    margin-inline: auto;
+  }
+  .nf__links {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    max-width: 1100px;
+    margin: clamp(2.5rem, 5vw, 3.5rem) auto 0;
+    text-align: center;
+  }
+  @media (max-width: 680px) {
+    .nf__links {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  .nf__card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 1.4rem 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+  .nf__card:hover {
+    border-color: var(--gold);
+    box-shadow: var(--shadow-md);
+  }
+  .nf__icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    color: var(--gold-deep);
+    background: var(--gold-soft);
+    border-radius: 12px;
+  }
+  .nf__card-name {
+    display: block;
+    font-weight: 700;
+    color: var(--ink);
+  }
+  .nf__card-desc {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+    white-space: nowrap;
+  }
+  @media (max-width: 680px) {
+    .nf__card-desc {
+      white-space: normal;
+    }
+  }
+  .nf__popular {
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+  .nf__popular-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 1rem;
+  }
+  .nf__tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    list-style: none;
+    padding: 0;
+  }
+  .nf__tags a {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.88rem;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    transition: border-color 200ms ease, color 200ms ease;
+  }
+  .nf__tags a:hover {
+    border-color: var(--gold);
+    color: var(--gold-deep);
+  }
+  .nf__home {
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  }
+</style>

@@ -1,0 +1,108 @@
+---
+// Accessible FAQ accordion. Pair with faqSchema(items) in the page <Seo> so
+// the same Q&A is exposed as FAQPage structured data (AEO / answer engines).
+// Questions use natural question phrasing; the first sentence of each answer
+// is a direct, snippet-friendly response.
+import type { FaqItem } from '../lib/schema';
+export interface Props {
+  items: FaqItem[];
+  title?: string;
+  eyebrow?: string;
+}
+const { items, title = 'Часто задаваемые вопросы', eyebrow = 'FAQ' } = Astro.props;
+---
+
+<section class="section faq" aria-labelledby="faq-title">
+  <div class="container container--narrow">
+    <div class="section-head section-head--center reveal">
+      <span class="eyebrow">{eyebrow}</span>
+      <h2 class="h2" id="faq-title">{title}</h2>
+    </div>
+    <ul class="faq__list reveal">
+      {
+        items.map((item, i) => (
+          <li class="faq__item">
+            <details name="faq">
+              <summary>
+                <span class="faq__q">{item.q}</span>
+                <span class="faq__icon" aria-hidden="true" />
+              </summary>
+              <div class="faq__a">
+                <p>{item.a}</p>
+              </div>
+            </details>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .faq__list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .faq__item {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+    transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
+  }
+  .faq__item:has(details[open]) {
+    border-color: var(--gold-line);
+    box-shadow: var(--shadow-sm);
+  }
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--ink);
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq__icon {
+    position: relative;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+  }
+  .faq__icon::before,
+  .faq__icon::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 2px;
+    background: var(--gold-deep);
+    border-radius: 2px;
+    transform: translate(-50%, -50%);
+    transition: transform 0.25s var(--ease);
+  }
+  .faq__icon::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
+  details[open] .faq__icon::after {
+    transform: translate(-50%, -50%) rotate(0);
+  }
+  .faq__a {
+    padding: 0 1.5rem 1.4rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    max-width: 64ch;
+  }
+  details[open] summary .faq__q {
+    color: var(--ink);
+  }
+</style>

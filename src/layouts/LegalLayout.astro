@@ -1,0 +1,128 @@
+---
+// Shared template for legal / policy pages (privacy, offer, refund).
+// The page passes title/description/path + a human date, and writes the
+// document body into the default slot (wrapped in .prose). Renders the
+// header with breadcrumbs and a "last updated" line, plus Breadcrumb schema.
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { breadcrumbSchema, type Crumb } from '../lib/schema';
+
+export interface Props {
+  title: string;
+  description: string;
+  path: string;
+  heading: string;
+  updated: string; // ISO date
+}
+const { title, description, path, heading, updated } = Astro.props;
+
+const crumbs: Crumb[] = [
+  { name: 'Главная', href: '/' },
+  { name: heading, href: path },
+];
+
+const updatedLabel = new Date(updated).toLocaleDateString('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+});
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  path={path}
+  schema={[breadcrumbSchema(crumbs)]}
+>
+  <article class="legal">
+    <header class="legal__head">
+      <div class="container container--narrow">
+        <div class="legal__crumbs"><Breadcrumbs crumbs={crumbs} /></div>
+        <h1 class="h1 legal__title">{heading}</h1>
+        <p class="legal__updated">
+          Редакция от <time datetime={updated}>{updatedLabel}</time>
+        </p>
+      </div>
+    </header>
+
+    <div class="container container--narrow">
+      <div class="prose legal__body"><slot /></div>
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal__head {
+    padding-top: clamp(7rem, 14vh, 9.5rem);
+    padding-bottom: clamp(1rem, 2vw, 1.5rem);
+  }
+  .legal__crumbs {
+    margin-bottom: 1.75rem;
+  }
+  .legal__title {
+    margin-bottom: 0.85rem;
+  }
+  .legal__updated {
+    font-size: 0.9rem;
+    color: var(--text-faint);
+  }
+  .legal__body {
+    padding-bottom: clamp(3.5rem, 7vw, 6rem);
+  }
+
+  .prose {
+    font-size: 1.04rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+  .prose :global(h2) {
+    font-size: clamp(1.35rem, 1.15rem + 1vw, 1.7rem);
+    margin-block: 2.5rem 0.9rem;
+    color: var(--ink);
+  }
+  .prose :global(h3) {
+    font-size: 1.18rem;
+    margin-block: 1.75rem 0.6rem;
+    color: var(--ink);
+  }
+  .prose :global(p) {
+    margin-bottom: 1.1rem;
+  }
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin: 0 0 1.25rem;
+    padding-left: 1.4rem;
+  }
+  .prose :global(li) {
+    margin-bottom: 0.5rem;
+  }
+  .prose :global(a) {
+    color: var(--gold-deep);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .prose :global(strong) {
+    color: var(--ink);
+  }
+  .prose :global(dl) {
+    margin: 0 0 1.25rem;
+    padding: 1.25rem 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .prose :global(dt) {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: var(--gold-deep);
+  }
+  .prose :global(dd) {
+    margin: 0.1rem 0 0.9rem;
+    color: var(--ink);
+  }
+  .prose :global(dd:last-child) {
+    margin-bottom: 0;
+  }
+</style>
