@@ -1,0 +1,46 @@
+# Builds the Astro site and uploads dist/ to Timeweb shared hosting via FTP.
+# Runs on push to main once the FTP secrets are configured.
+#
+# Required GitHub secrets (Settings → Secrets and variables → Actions):
+#   FTP_SERVER    — FTP host, e.g. axioagency.ru or xxxxx.timeweb.ru
+#   FTP_USERNAME  — FTP login
+#   FTP_PASSWORD  — FTP password
+# Required GitHub variable (same screen, "Variables" tab):
+#   FTP_PATH      — server dir, e.g. /axioagency.ru/public_html  (no trailing slash)
+name: Build & deploy to Timeweb (FTP)
+
+on:
+  # Switch to push once secrets are set. Manual for now.
+  workflow_dispatch: {}
+  # push:
+  #   branches: [main]
+
+jobs:
+  build-ftp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftps          # Timeweb supports FTPS; fall back to "ftp" if it fails
+          local-dir: ./dist/       # trailing slash = contents of dist
+          server-dir: ${{ vars.FTP_PATH }}/
+          # Mirror deletions too, so removed pages disappear from the server.
+          dangerous-clean-slate: false
