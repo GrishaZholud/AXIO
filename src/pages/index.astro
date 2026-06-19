@@ -9,7 +9,8 @@ import { serviceGroups, servicesByGroup, services } from '../data/services';
 import { featuredCases } from '../data/cases';
 import { faqsByTopic } from '../data/faqs';
 import { site } from '../lib/site';
-import { faqSchema, serviceSchema } from '../lib/schema';
+import { faqSchema, serviceSchema, reviewSchema, speakableSchema } from '../lib/schema';
+import { realReviews } from '../data/reviews';
 
 // Tabbed FAQ by direction (issue: пользователь выбирает направление)
 const faqTabs = [
@@ -35,6 +36,8 @@ const schema = [
     .map((s) =>
       serviceSchema({ name: s.label, description: s.short, url: `${site.url}/${s.slug}` })
     ),
+  ...reviewSchema(realReviews),
+  speakableSchema(site.url),
 ];
 ---
 

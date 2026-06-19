@@ -14,7 +14,7 @@ import { getService } from '../data/services';
 import { getCase } from '../data/cases';
 import { faqsByTopic } from '../data/faqs';
 import { site } from '../lib/site';
-import { articleSchema, faqSchema, breadcrumbSchema, type Crumb } from '../lib/schema';
+import { articleSchema, faqSchema, breadcrumbSchema, speakableSchema, type Crumb } from '../lib/schema';
 
 export interface Props {
   slug: string;
@@ -42,12 +42,14 @@ const schema = [
     headline: post.title,
     description: post.description,
     url: `${site.url}/blog/${slug}`,
-    image: post.cover,
+    image: `/images/og/blog/${slug}.jpg`,
     datePublished: post.datePublished,
     dateModified: post.dateModified,
+    authorName: post.author,
   }),
   faqSchema(faqs),
   breadcrumbSchema(crumbs),
+  speakableSchema(`${site.url}/blog/${slug}`),
 ];
 ---
 
@@ -55,7 +57,7 @@ const schema = [
   title={`${post.title} | Блог AXIO`}
   description={post.description}
   path={`/blog/${slug}`}
-  image={post.cover}
+  image={`/images/og/blog/${slug}.jpg`}
   type="article"
   schema={schema}
 >
@@ -71,7 +73,7 @@ const schema = [
           <span aria-hidden="true">·</span>
           <span>{post.readingTime} чтения</span>
           <span aria-hidden="true">·</span>
-          <span>AXIO</span>
+          <span class="post__author">{post.author}{post.authorRole ? `, ${post.authorRole}` : ''}</span>
         </p>
       </div>
     </header>

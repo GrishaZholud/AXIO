@@ -151,6 +151,22 @@ export function reviewSchema(items: { text: string; author: string }[]) {
   }));
 }
 
+/**
+ * SpeakableSpecification — marks the headline, lead and FAQ answers as the
+ * sections voice assistants should read aloud (AEO / voice search).
+ */
+export function speakableSchema(url: string) {
+  return {
+    '@type': 'WebPage',
+    '@id': `${url}#webpage`,
+    url,
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['h1', '.lead', '.faq__q', '.faq__a'],
+    },
+  };
+}
+
 export interface Crumb {
   name: string;
   href: string;

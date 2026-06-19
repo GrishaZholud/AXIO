@@ -20,11 +20,19 @@ export interface Post {
   cases: string[];
   datePublished: string;
   dateModified: string;
+  /** Named author for E-E-A-T (Article schema + byline) */
+  author: string;
+  /** Author's role/expertise shown next to the name */
+  authorRole?: string;
 }
+
+// Default author for editorial posts — the agency founder.
+const FOUNDER = { author: 'Григорий Жолудь', authorRole: 'основатель AXIO' };
 
 export const posts: Post[] = [
   {
     slug: 'localyandexmaps',
+    ...FOUNDER,
     title: 'Яндекс Карты для локального бизнеса: полный гайд',
     excerpt:
       'Как заполнить профиль в Яндекс Бизнес, собрать отзывы и получать стабильный поток звонков с карт и 2ГИС — без рекламного бюджета.',
@@ -41,6 +49,7 @@ export const posts: Post[] = [
   },
   {
     slug: 'tildavscode',
+    ...FOUNDER,
     title: 'Tilda vs чистый код: что выбрать в 2025 году',
     excerpt:
       'Честное сравнение: скорость, стоимость, гибкость и SEO-потенциал. Помогаем выбрать правильный вариант под задачу бизнеса.',
@@ -57,6 +66,7 @@ export const posts: Post[] = [
   },
   {
     slug: 'post-yandex',
+    ...FOUNDER,
     title: 'Как вывести сайт в топ Яндекса за 3 месяца: разбор реального кейса',
     excerpt:
       'Пошаговый разбор: технический аудит, семантика, контент и поведенческие факторы. +320% трафика и топ-3 за 90 дней — без покупки ссылок.',
@@ -73,6 +83,7 @@ export const posts: Post[] = [
   },
   {
     slug: 'wildberries-2025-algoritm-ranzhirovaniya',
+    ...FOUNDER,
     title: 'Wildberries 2025: как работает алгоритм ранжирования',
     excerpt:
       '7 ключевых факторов выдачи WB в 2025 году: конверсия, доставка, отзывы, контент, выкуп, цена и реклама. Что работает, а что больше нет.',
@@ -89,6 +100,7 @@ export const posts: Post[] = [
   },
   {
     slug: 'targetvk2025',
+    ...FOUNDER,
     title: 'Таргет ВКонтакте в 2025: форматы, аудитории и цена заявки',
     excerpt:
       'Какие форматы VK Рекламы работают сейчас, где искать аудиторию и три рычага снижения цены заявки. С чего начать при бюджете 300 ₽/день.',
@@ -105,6 +117,7 @@ export const posts: Post[] = [
   },
   {
     slug: 'ai-bot-kofeyna',
+    ...FOUNDER,
     title: 'Как мы внедрили ИИ-бота в кофейню и сократили нагрузку на 60%',
     excerpt:
       'Кейс: Telegram-бот на GPT-4o mini для кофейни. Запись на мастер-классы, приём предзаказов и ответы на FAQ — внедрение за 3 дня.',

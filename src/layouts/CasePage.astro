@@ -14,7 +14,7 @@ import { getService } from '../data/services';
 import { caseContent } from '../data/caseContent';
 import { faqsByTopic } from '../data/faqs';
 import { site } from '../lib/site';
-import { articleSchema, faqSchema, breadcrumbSchema, type Crumb } from '../lib/schema';
+import { articleSchema, faqSchema, breadcrumbSchema, speakableSchema, type Crumb } from '../lib/schema';
 
 export interface Props {
   slug: string;
@@ -59,12 +59,13 @@ const schema = [
     headline: study.headline,
     description: study.seoDescription,
     url: `${site.url}/cases/${slug}`,
-    image: `/images/og/${slug}.jpg`,
+    image: `/images/og/cases/${slug}.jpg`,
     datePublished: c.datePublished,
     dateModified: c.dateModified,
   }),
   faqSchema(faqs),
   breadcrumbSchema(crumbs),
+  speakableSchema(`${site.url}/cases/${slug}`),
 ];
 ---
 
@@ -72,6 +73,7 @@ const schema = [
   title={study.seoTitle}
   description={study.seoDescription}
   path={`/cases/${slug}`}
+  image={`/images/og/cases/${slug}.jpg`}
   type="article"
   heroHeader={true}
   schema={schema}

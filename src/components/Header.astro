@@ -86,31 +86,33 @@ const isActive = (href: string) =>
       </button>
     </div>
   </div>
-
-  <!-- Mobile drawer -->
-  <div class="drawer" data-drawer hidden>
-    <nav class="drawer__nav" aria-label="Мобильная навигация">
-      <a href="/" class="drawer__link">Главная</a>
-      <details class="drawer__group">
-        <summary>Услуги</summary>
-        {serviceGroups.map((group) => (
-          <div class="drawer__subgroup">
-            <p class="drawer__subtitle">{group}</p>
-            {servicesByGroup(group).map((s) => (
-              <a href={`/${s.slug}`} class="drawer__sublink">{s.label}</a>
-            ))}
-          </div>
-        ))}
-      </details>
-      <a href="/cases" class="drawer__link">Кейсы</a>
-      <a href="/about" class="drawer__link">О нас</a>
-      <a href="/blog" class="drawer__link">Блог</a>
-      <a href="/contacts" class="drawer__link">Контакты</a>
-      <button type="button" class="btn btn--gold drawer__cta" data-lead-open>Обсудить проект</button>
-      <a href={`tel:${site.phoneHref}`} class="drawer__phone">{site.phone}</a>
-    </nav>
-  </div>
 </header>
+
+<!-- Mobile drawer — kept OUTSIDE <header> on purpose: the header's
+     backdrop-filter makes it a containing block for fixed descendants,
+     which would collapse this drawer to the header's height. -->
+<div class="drawer" data-drawer hidden>
+  <nav class="drawer__nav" aria-label="Мобильная навигация">
+    <a href="/" class="drawer__link">Главная</a>
+    <details class="drawer__group">
+      <summary>Услуги</summary>
+      {serviceGroups.map((group) => (
+        <div class="drawer__subgroup">
+          <p class="drawer__subtitle">{group}</p>
+          {servicesByGroup(group).map((s) => (
+            <a href={`/${s.slug}`} class="drawer__sublink">{s.label}</a>
+          ))}
+        </div>
+      ))}
+    </details>
+    <a href="/cases" class="drawer__link">Кейсы</a>
+    <a href="/about" class="drawer__link">О нас</a>
+    <a href="/blog" class="drawer__link">Блог</a>
+    <a href="/contacts" class="drawer__link">Контакты</a>
+    <button type="button" class="btn btn--gold drawer__cta" data-lead-open>Обсудить проект</button>
+    <a href={`tel:${site.phoneHref}`} class="drawer__phone">{site.phone}</a>
+  </nav>
+</div>
 
 <style>
   .site-header {
@@ -337,6 +339,9 @@ const isActive = (href: string) =>
   .drawer {
     position: fixed;
     inset: var(--header-h) 0 0 0;
+    /* Below the header bar (z-index 100) so burger/X stay on top,
+       above page content. */
+    z-index: 90;
     background: var(--cream);
     padding: 1.5rem var(--gutter) 3rem;
     overflow-y: auto;

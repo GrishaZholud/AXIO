@@ -23,6 +23,7 @@ import {
   breadcrumbSchema,
   howToSchema,
   reviewSchema,
+  speakableSchema,
   type Crumb,
 } from '../lib/schema';
 
@@ -105,6 +106,7 @@ const schema = [
   ...reviewSchema(realReviews),
   faqSchema(faqs),
   breadcrumbSchema(crumbs),
+  speakableSchema(`${site.url}/${p.slug}`),
 ];
 ---
 
