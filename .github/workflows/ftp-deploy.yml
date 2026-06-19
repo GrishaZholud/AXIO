@@ -10,10 +10,9 @@
 name: Build & deploy to Timeweb (FTP)
 
 on:
-  # Switch to push once secrets are set. Manual for now.
+  push:
+    branches: [main]
   workflow_dispatch: {}
-  # push:
-  #   branches: [main]
 
 jobs:
   build-ftp:
